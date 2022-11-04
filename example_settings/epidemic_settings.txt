@@ -1,2 +1,3 @@
 Scenario.name = Epidemic
 Group.router = EpidemicRouter
+Group.sendQueue = PFIFO
