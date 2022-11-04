@@ -1,0 +1,5 @@
+Scenario.name = SprayAndWait
+Group.router = SprayAndWaitRouter
+SprayAndWaitRouter.nrofCopies = 10
+SprayAndWaitRouter.binaryMode = true
+Group.sendQueue = PFIFO
