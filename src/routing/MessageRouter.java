@@ -55,7 +55,7 @@ public abstract class MessageRouter {
 	public static final int Q_MODE_FIFO = 2;
 	/** Setting value for LIFO queue mode */
 	public static final int Q_MODE_LIFO = 3;
-	/** Setting value for LIFO queue mode */
+	/** Setting value for prioritized FIFO queue mode */
 	public static final int Q_MODE_PFIFO = 4;
 
 	/** Setting string for random queue mode */
