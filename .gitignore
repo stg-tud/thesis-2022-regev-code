@@ -17,3 +17,7 @@ doc/package-list
 .settings/org.eclipse.*
 *.md
 HISTORY.txt
+
+# misc
+example_settings/
+example_settings/*
