@@ -63,8 +63,8 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		assert nrofCopies != null : "Not a SnW message: " + msg;
 
 		if (isBinary) {
-			/* in binary S'n'W the receiving node gets floor(n/2) copies */
-			nrofCopies = (int)Math.floor(nrofCopies/2.0);
+			/* in binary S'n'W the receiving node gets ceil(n/2) copies */
+			nrofCopies = (int)Math.ceil(nrofCopies/2.0);
 		}
 		else {
 			/* in standard S'n'W the receiving node gets only single copy */
@@ -77,7 +77,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 
 	@Override
 	public boolean createNewMessage(Message msg) {
-		makeRoomForNewMessage(msg.getSize());
+		makeRoomForNewMessage(msg);
 
 		msg.setTtl(this.msgTtl);
 		msg.addProperty(MSG_COUNT_PROPERTY, new Integer(initialNrofCopies));
@@ -148,8 +148,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		/* reduce the amount of copies left */
 		nrofCopies = (Integer)msg.getProperty(MSG_COUNT_PROPERTY);
 		if (isBinary) {
-			/* in binary S'n'W the sending node keeps ceil(n/2) copies */
-			nrofCopies = (int)Math.ceil(nrofCopies/2.0);
+			nrofCopies /= 2;
 		}
 		else {
 			nrofCopies--;
