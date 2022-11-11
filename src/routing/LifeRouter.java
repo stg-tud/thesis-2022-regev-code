@@ -55,7 +55,7 @@ public class LifeRouter extends ActiveRouter {
 		int peerMsgCount = 0;
 
 		for (Connection c : getConnections()) {
-			if (c.getOtherNode(me).getRouter().hasMessage(id)) {
+			if (c.getOtherNode(me).getRouter().hasMessage(id, me.getRouter().determineBucketIDofMessage(m))) {
 				peerMsgCount++;
 			}
 		}
@@ -90,10 +90,10 @@ public class LifeRouter extends ActiveRouter {
 		if (exchangeDeliverableMessages() != null) {
 			return;
 		}
-		this.tryAllMessagesToAllConnections();
+		this.tryAllMessagesToAllConnections(this.determineNextSendingBucket());
 
 		/* see if need to drop some messages... */
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(this.determineNextSendingBucket())) {
 			peerMsgCount = getPeerMessageCount(m);
 			if (peerMsgCount < this.countRange[0] ||
 					peerMsgCount > this.countRange[1]) {
@@ -101,7 +101,7 @@ public class LifeRouter extends ActiveRouter {
 			}
 		}
 		for (String id : messagesToDelete) { /* ...and drop them */
-			this.deleteMessage(id, true);
+			this.deleteMessage(id, this.determineNextSendingBucket() ,true);
 		}
 
 	}
