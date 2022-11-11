@@ -24,6 +24,7 @@ import routing.util.RoutingInfo;
 import util.Tuple;
 import buffermanagement.BucketPolicy;
 
+
 /**
  * Superclass for message routers.
  */
@@ -144,7 +145,6 @@ public abstract class MessageRouter {
 		if (s.contains(BUCKET_POLICY_S)) {
 			String bucketPolicyClass = s.getSetting(BUCKET_POLICY_S);
 			this.bucketPolicy = (BucketPolicy) s.createIntializedObject("buffermanagement." + bucketPolicyClass);
-			//TODO
 		}
 		else {
 			this.bucketPolicy = null;
@@ -296,22 +296,41 @@ public abstract class MessageRouter {
 	 * @return a reference to the messages of this router in collection
 	 */
 	public Collection<Message> getMessageCollection(int bucketID) {
+		if (bucketID == -1){
+			HashMap<String,Message> allMessages = new HashMap<String,Message>();
+			for (int i = 0; i < this.messages.size() ; i++){
+				allMessages.putAll(this.messages.get(i));
+			}
+			return allMessages.values();
+		}		
 		return this.messages.get(bucketID).values();
 	}
 
 	/**
-	 * Returns the number of messages this router has
+	 * Returns the TOTAL (=sum of buckets) number of messages this router has
 	 * @return How many messages this router has
 	 */
-	public int getNrofMessages(int bucketID) {
-		return this.messages.get(bucketID).size();
+	public int getNrofMessages() {
+		int totalMessages = 0;
+		for (int i = 0; i < this.messages.size(); i++){
+			totalMessages += this.messages.get(i).size();;
+		}
+		return totalMessages;
 	}
 
 	/**
 	 * Returns the size of the message buffer.
 	 * @return The size or Integer.MAX_VALUE if the size isn't defined.
 	 */
+	//todo auch nach Bucket möglich machen
 	public long getBufferSize(int bucketID) {
+		if (bucketID == -1){
+			long total = 0;
+			for(int i = 0; i < this.bufferSize.size(); i++){
+				total += this.bufferSize.get(i);
+				return total;
+			}
+		}
 		return this.bufferSize.get(bucketID);
 	}
 
@@ -323,6 +342,15 @@ public abstract class MessageRouter {
 	 * size isn't defined)
 	 */
 	public long getFreeBufferSize(int bucketID) {
+		if (bucketID == -1){
+			long total = 0;
+			long totalUsed = 0;
+			for (int i = 0; i < this.bufferSize.size(); i++){
+				total += this.bufferSize.get(i);
+				totalUsed += this.bufferOccupancy.get(i);
+				return total - totalUsed;
+			}
+		}
 		if (this.getBufferSize(bucketID) == Integer.MAX_VALUE) {
 			return Integer.MAX_VALUE;
 		}
@@ -344,7 +372,6 @@ public abstract class MessageRouter {
 	 * @param to The host to send the message to
 	 */
 	public void sendMessage(String id, DTNHost to, int bucketID) {
-		// TODO öhmm
 		Message m = getMessage(id, bucketID);
 		Message m2;
 		if (m == null) throw new SimError("no message for id " +
@@ -484,7 +511,7 @@ public abstract class MessageRouter {
 	}
 
 
-	protected int determineBucketIDofMessage(Message incomingMessage){
+	public int determineBucketIDofMessage(Message incomingMessage){
 		if (this.bucketPolicy == null){
 			return 0;
 		}
@@ -493,7 +520,7 @@ public abstract class MessageRouter {
 		}
 	}
 
-	protected int determineBucketIDofMessageID(String messageID){
+	public int determineBucketIDofMessageID(String messageID){
 		if (this.bucketPolicy == null){
 			return 0;
 		}
@@ -501,6 +528,25 @@ public abstract class MessageRouter {
 			return this.bucketPolicy.determineBucketIDofMessageID(this, messageID);
 		}
 	}
+
+	public int determineNextSendingBucket(){
+		if (this.bucketPolicy == null){
+			return 0;
+		}
+		else{
+			return this.bucketPolicy.determineNextSendingBucket(this);
+		}
+	}
+
+	public int determineNumberofBuckets(){
+		if (this.bucketPolicy == null){
+			return 0;
+		}
+		else{
+			return this.bucketPolicy.determineNextSendingBucket(this);
+		}
+	}
+
 	/**
 	 * Adds a message to the message buffer and informs message listeners
 	 * about new message (if requested).
@@ -525,8 +571,7 @@ public abstract class MessageRouter {
 	 * @param id Identifier of the message to remove
 	 * @return The removed message or null if message for the ID wasn't found
 	 */
-	protected Message removeFromMessages(String id) {
-		int bucketID= determineBucketIDofMessageID(id);
+	protected Message removeFromMessages(String id,int bucketID) {
 		Message m = this.messages.get(bucketID).remove(id);
 		this.bufferOccupancy.put(bucketID, this.bufferOccupancy.get(bucketID) - m.getSize());
 		return m;
@@ -572,8 +617,8 @@ public abstract class MessageRouter {
 	 * should be set to true. False value indicates e.g. remove of message
 	 * because it was delivered to final destination.
 	 */
-	public void deleteMessage(String id, boolean drop) {
-		Message removed = removeFromMessages(id);
+	public void deleteMessage(String id,int bucketID ,boolean drop) {
+		Message removed = removeFromMessages(id, bucketID);
 		if (removed == null) throw new SimError("no message for id " +
 				id + " to remove at " + this.host);
 
@@ -867,12 +912,9 @@ public abstract class MessageRouter {
 	 * @return A String presentation of this router
 	 */
 	public String toString() {
-		int totalNoofMessages = 0;
-		for(int i=0 ; i < this.bufferSize.size(); i++){
-			totalNoofMessages += getNrofMessages(i);
-		}
+
 		return getClass().getSimpleName() + " of " +
-			this.getHost().toString() + " with " + totalNoofMessages
+			this.getHost().toString() + " with " + getNrofMessages()
 			+ " messages";
 	}
 }

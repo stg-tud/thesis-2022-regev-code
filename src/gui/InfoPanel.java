@@ -18,6 +18,8 @@ import movement.Path;
 import core.DTNHost;
 import core.Message;
 
+import java.util.ArrayList;
+
 /**
  * Information panel that shows data of selected messages and nodes.
  */
@@ -49,13 +51,16 @@ public class InfoPanel extends JPanel implements ActionListener{
 	 * @param host Host to show the information of
 	 */
 	public void showInfo(DTNHost host) {
-		Vector<Message> messages = new Vector<Message>(host.getMessageCollection());
+		Vector<Message> messages = new Vector<Message>();
+		for (int i = 0; i < host.getRouter().determineNumberofBuckets() ; i++){
+			messages.addAll(host.getMessageCollection(i));
+		}
 		Collections.sort(messages);
 		reset();
 		this.selectedHost = host;
 		String text = (host.isMovementActive() ? "" : "INACTIVE ") + host +
 			" at " + host.getLocation();
-
+		
 		msgChooser = new JComboBox(messages);
 		msgChooser.insertItemAt(messages.size() + " messages", 0);
 		msgChooser.setSelectedIndex(0);
