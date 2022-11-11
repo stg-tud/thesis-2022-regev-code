@@ -22,6 +22,7 @@ import core.SimClock;
 import core.SimError;
 import routing.util.RoutingInfo;
 import util.Tuple;
+import buffermanagement.BucketPolicy;
 
 /**
  * Superclass for message routers.
@@ -46,6 +47,12 @@ public abstract class MessageRouter {
 	 * </UL>
 	 */
 	public static final String SEND_QUEUE_MODE_S = "sendQueue";
+
+		/**
+	 * Bucket policy -setting id ({@value}). The class name used as the bucket
+	 * policy implementation.
+	 */
+	public static final String BUCKET_POLICY_S = "bucketPolicy";
 
 	int max_sending_id = 4;
 
@@ -98,7 +105,7 @@ public abstract class MessageRouter {
 	/** The messages being transferred with msgID_hostName keys */
 	private HashMap<String, Message> incomingMessages;
 	/** The messages this router is carrying */
-	private HashMap<String, Message> messages;
+	private HashMap<Integer, HashMap<String, Message>> messages = new HashMap<Integer, HashMap<String, Message>>();
 	/** The messages this router has received as the final recipient */
 	private HashMap<String, Message> deliveredMessages;
 	/** The messages that Applications on this router have blacklisted */
@@ -106,13 +113,15 @@ public abstract class MessageRouter {
 	/** Host where this router belongs to */
 	private DTNHost host;
 	/** size of the buffer */
-	private long bufferSize;
+	private HashMap<Integer, Long> bufferSize = new HashMap<Integer, Long>();
 	/** current occupancy of the buffer */
-	private long bufferOccupancy;
+	private HashMap<Integer, Long> bufferOccupancy = new HashMap<Integer, Long>();
 	/** TTL for all messages */
 	protected int msgTtl;
 	/** Queue mode for sending messages */
 	private int sendQueueMode;
+	/** The bucket policy used by the router. */
+	private BucketPolicy bucketPolicy;
 
 	/** applications attached to the host */
 	private HashMap<String, Collection<Application>> applications = null;
@@ -124,14 +133,22 @@ public abstract class MessageRouter {
 	 * @param s The settings object
 	 */
 	public MessageRouter(Settings s) {
-		this.bufferSize = Integer.MAX_VALUE; // defaults to rather large buffer
+		this.bufferSize.put(0, Long.valueOf(Integer.MAX_VALUE));// defaults to rather large buffer with default 1 shared buffer
 		this.msgTtl = Message.INFINITE_TTL;
 		this.applications = new HashMap<String, Collection<Application>>();
 
 		if (s.contains(B_SIZE_S)) {
-			this.bufferSize = s.getLong(B_SIZE_S);
+			this.bufferSize.put(0,s.getLong(B_SIZE_S));
 		}
-
+		// Create a bucket policy object if it is specified in the settings.
+		if (s.contains(BUCKET_POLICY_S)) {
+			String bucketPolicyClass = s.getSetting(BUCKET_POLICY_S);
+			this.bucketPolicy = (BucketPolicy) s.createIntializedObject("buffermanagement." + bucketPolicyClass);
+			//TODO
+		}
+		else {
+			this.bucketPolicy = null;
+		}
 		if (s.contains(MSG_TTL_S)) {
 			this.msgTtl = s.getInt(MSG_TTL_S);
 			
@@ -174,12 +191,21 @@ public abstract class MessageRouter {
 	 */
 	public void init(DTNHost host, List<MessageListener> mListeners) {
 		this.incomingMessages = new HashMap<String, Message>();
-		this.messages = new HashMap<String, Message>();
 		this.deliveredMessages = new HashMap<String, Message>();
 		this.blacklistedMessages = new HashMap<String, Object>();
 		this.mListeners = mListeners;
 		this.host = host;
-		this.bufferOccupancy = 0;
+
+		if (this.bucketPolicy == null){
+			this.messages.put(0, new HashMap<String, Message>());
+			this.bufferOccupancy.put(0,Long.valueOf(0));
+		}
+		else{
+			for(int i = 0; i < bufferOccupancy.size(); i++){
+				this.messages.put(i, new HashMap<String, Message>());
+				this.bufferOccupancy.put(i,Long.valueOf(0));
+			}
+		}
 	}
 
 	/**
