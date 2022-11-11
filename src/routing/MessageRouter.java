@@ -249,8 +249,8 @@ public abstract class MessageRouter {
 	 * @param id ID of the message
 	 * @return The message
 	 */
-	protected Message getMessage(String id) {
-		return this.messages.get(id);
+	protected Message getMessage(String messageId, int bucketID) {
+		return this.messages.get(bucketID).get(messageId);
 	}
 
 	/**
@@ -258,8 +258,8 @@ public abstract class MessageRouter {
 	 * @param id Identifier of the message
 	 * @return True if the router has message with this id, false if not
 	 */
-	public boolean hasMessage(String id) {
-		return this.messages.containsKey(id);
+	public boolean hasMessage(String messageID, int bucketID) {
+		return this.messages.get(bucketID).containsKey(messageID);
 	}
 
 	/**
@@ -295,24 +295,24 @@ public abstract class MessageRouter {
 	 * exceptions.
 	 * @return a reference to the messages of this router in collection
 	 */
-	public Collection<Message> getMessageCollection() {
-		return this.messages.values();
+	public Collection<Message> getMessageCollection(int bucketID) {
+		return this.messages.get(bucketID).values();
 	}
 
 	/**
 	 * Returns the number of messages this router has
 	 * @return How many messages this router has
 	 */
-	public int getNrofMessages() {
-		return this.messages.size();
+	public int getNrofMessages(int bucketID) {
+		return this.messages.get(bucketID).size();
 	}
 
 	/**
 	 * Returns the size of the message buffer.
 	 * @return The size or Integer.MAX_VALUE if the size isn't defined.
 	 */
-	public long getBufferSize() {
-		return this.bufferSize;
+	public long getBufferSize(int bucketID) {
+		return this.bufferSize.get(bucketID);
 	}
 
 	/**
@@ -322,12 +322,12 @@ public abstract class MessageRouter {
 	 * @return The amount of free space (Integer.MAX_VALUE if the buffer
 	 * size isn't defined)
 	 */
-	public long getFreeBufferSize() {
-		if (this.getBufferSize() == Integer.MAX_VALUE) {
+	public long getFreeBufferSize(int bucketID) {
+		if (this.getBufferSize(bucketID) == Integer.MAX_VALUE) {
 			return Integer.MAX_VALUE;
 		}
 
-		return this.getBufferSize() - this.bufferOccupancy;
+		return this.getBufferSize(bucketID) - this.bufferOccupancy.get(bucketID);
 	}
 
 	/**
@@ -343,8 +343,9 @@ public abstract class MessageRouter {
 	 * @param id Id of the message to send
 	 * @param to The host to send the message to
 	 */
-	public void sendMessage(String id, DTNHost to) {
-		Message m = getMessage(id);
+	public void sendMessage(String id, DTNHost to, int bucketID) {
+		// TODO öhmm
+		Message m = getMessage(id, bucketID);
 		Message m2;
 		if (m == null) throw new SimError("no message for id " +
 				id + " to send at " + this.host);
@@ -374,6 +375,7 @@ public abstract class MessageRouter {
 	public int receiveMessage(Message m, DTNHost from) {
 		Message newMessage = m.replicate();
 
+		// TODO und wie gehts weiter vom IncomingBuffer? Dort die Logik einbauen
 		this.putToIncomingBuffer(newMessage, from);
 		newMessage.addNodeOnPath(this.host);
 
@@ -481,6 +483,24 @@ public abstract class MessageRouter {
 		return !this.incomingMessages.isEmpty();
 	}
 
+
+	protected int determineBucketIDofMessage(Message incomingMessage){
+		if (this.bucketPolicy == null){
+			return 0;
+		}
+		else{
+			return this.bucketPolicy.determineBucketIDofMessage(this, incomingMessage);
+		}
+	}
+
+	protected int determineBucketIDofMessageID(String messageID){
+		if (this.bucketPolicy == null){
+			return 0;
+		}
+		else{
+			return this.bucketPolicy.determineBucketIDofMessageID(this, messageID);
+		}
+	}
 	/**
 	 * Adds a message to the message buffer and informs message listeners
 	 * about new message (if requested).
@@ -489,8 +509,9 @@ public abstract class MessageRouter {
 	 * message, if false, nothing is informed.
 	 */
 	protected void addToMessages(Message m, boolean newMessage) {
-		this.messages.put(m.getId(), m);
-		this.bufferOccupancy += m.getSize();
+		int bucketID= determineBucketIDofMessage(m);
+		this.messages.get(bucketID).put(m.getId(), m);
+		this.bufferOccupancy.put(bucketID, this.bufferOccupancy.get(bucketID) + m.getSize());
 
 		if (newMessage) {
 			for (MessageListener ml : this.mListeners) {
@@ -505,8 +526,9 @@ public abstract class MessageRouter {
 	 * @return The removed message or null if message for the ID wasn't found
 	 */
 	protected Message removeFromMessages(String id) {
-		Message m = this.messages.remove(id);
-		this.bufferOccupancy -= m.getSize();
+		int bucketID= determineBucketIDofMessageID(id);
+		Message m = this.messages.get(bucketID).remove(id);
+		this.bufferOccupancy.put(bucketID, this.bufferOccupancy.get(bucketID) - m.getSize());
 		return m;
 	}
 
@@ -845,8 +867,12 @@ public abstract class MessageRouter {
 	 * @return A String presentation of this router
 	 */
 	public String toString() {
+		int totalNoofMessages = 0;
+		for(int i=0 ; i < this.bufferSize.size(); i++){
+			totalNoofMessages += getNrofMessages(i);
+		}
 		return getClass().getSimpleName() + " of " +
-			this.getHost().toString() + " with " + getNrofMessages()
+			this.getHost().toString() + " with " + totalNoofMessages
 			+ " messages";
 	}
 }
