@@ -48,7 +48,7 @@ public class MessageRelayEvent extends MessageEvent {
 
 		switch(stage) {
 		case SENDING:
-			from.sendMessage(id, to);
+			from.sendMessage(id ,to , from.getRouter().determineBucketIDofMessageID(id));
 			break;
 		case TRANSFERRED:
 			to.messageTransferred(id, from);

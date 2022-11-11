@@ -10,4 +10,8 @@ public abstract class BucketPolicy {
     public abstract int determineBucketIDofMessage(MessageRouter router, Message incomingMessage);
 
     public abstract int determineBucketIDofMessageID(MessageRouter router, String messageID);
+
+    public abstract int determineNextSendingBucket(MessageRouter router);
+
+    public abstract int determineNumberofBuckets(MessageRouter router);
 }

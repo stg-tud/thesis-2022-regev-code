@@ -40,14 +40,14 @@ public class MessageDeleteEvent extends MessageEvent {
 
 		if (id.equals(StandardEventsReader.ALL_MESSAGES_ID)) {
 			List<String> ids = new ArrayList<String>();
-			for (Message m : host.getMessageCollection()) {
+			for (Message m : host.getMessageCollection(-1)) {
 				ids.add(m.getId());
 			}
 			for (String nextId : ids) {
-				host.deleteMessage(nextId, drop);
+				host.deleteMessage(nextId,host.getRouter().determineBucketIDofMessageID(nextId) ,drop);
 			}
 		} else {
-			host.deleteMessage(id, drop);
+			host.deleteMessage(id,host.getRouter().determineBucketIDofMessageID(id), drop);
 		}
 	}
 

@@ -543,7 +543,7 @@ public abstract class MessageRouter {
 			return 0;
 		}
 		else{
-			return this.bucketPolicy.determineNextSendingBucket(this);
+			return this.bucketPolicy.determineNumberofBuckets(this);
 		}
 	}
 
