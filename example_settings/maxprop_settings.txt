@@ -1,0 +1,3 @@
+Scenario.name = MaxProp
+Group.router = MaxPropRouter
+MovementModel.rngSeed = [1]

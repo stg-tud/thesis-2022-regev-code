@@ -19,7 +19,5 @@ doc/package-list
 HISTORY.txt
 
 # misc
-example_settings/
-example_settings/*
 /bin/
 lib/junit-platform-console-standalone-1.9.1.jar
