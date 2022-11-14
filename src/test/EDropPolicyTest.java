@@ -80,7 +80,7 @@ public class EDropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m2));
+		assertFalse(h0.getMessageCollection(-1).contains(m2));
 		checkCreates(1);
 		advanceWorld(1);
 		assertFalse(mc.next());
@@ -117,7 +117,7 @@ public class EDropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m3));
+		assertFalse(h0.getMessageCollection(-1).contains(m3));
 		checkCreates(1);
 		advanceWorld(1);
 		assertFalse(mc.next());
@@ -154,12 +154,12 @@ public class EDropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m1));
+		assertFalse(h0.getMessageCollection(-1).contains(m1));
 		
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m2));
+		assertFalse(h0.getMessageCollection(-1).contains(m2));
 		checkCreates(1);
 		advanceWorld(1);
 		assertFalse(mc.next());

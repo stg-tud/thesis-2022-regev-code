@@ -76,12 +76,12 @@ public class FIFODropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m1));
+		assertFalse(h0.getMessageCollection(-1).contains(m1));
 		
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m2));
+		assertFalse(h0.getMessageCollection(-1).contains(m2));
 		
 		
 		
