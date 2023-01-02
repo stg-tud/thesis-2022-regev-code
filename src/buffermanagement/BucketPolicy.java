@@ -2,10 +2,11 @@ package buffermanagement;
 
 import core.Message;
 import routing.MessageRouter;
-
+import core.Settings;
 
 public abstract class BucketPolicy {
-    
+    public BucketPolicy(Settings s) {
+	}
     // determines bucket ID
     public abstract int determineBucketIDofMessage(MessageRouter router, Message incomingMessage);
 

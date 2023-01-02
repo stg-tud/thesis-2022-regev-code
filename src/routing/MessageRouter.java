@@ -201,9 +201,10 @@ public abstract class MessageRouter {
 			this.bufferOccupancy.put(0,Long.valueOf(0));
 		}
 		else{
-			for(int i = 0; i < bufferOccupancy.size(); i++){
+			for(int i = 0; i < this.bucketPolicy.determineNumberofBuckets(null); i++){
 				this.messages.put(i, new HashMap<String, Message>());
 				this.bufferOccupancy.put(i,Long.valueOf(0));
+				this.bufferSize.put(i, Long.valueOf(Integer.MAX_VALUE));
 			}
 		}
 	}
@@ -216,6 +217,8 @@ public abstract class MessageRouter {
 		this.bufferSize = r.bufferSize;
 		this.msgTtl = r.msgTtl;
 		this.sendQueueMode = r.sendQueueMode;
+		this.bucketPolicy = r.bucketPolicy;
+		this.bufferOccupancy = r.bufferOccupancy;
 
 		this.applications = new HashMap<String, Collection<Application>>();
 		for (Collection<Application> apps : r.applications.values()) {
