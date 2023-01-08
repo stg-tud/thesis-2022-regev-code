@@ -24,9 +24,9 @@ public class PassiveDropPolicy extends DropPolicy{
 		
 		// Get the incoming message size.
 		int size = incomingMessage == null ? 0 : incomingMessage.getSize();
-		
+		int bucketId = router.determineBucketIDofMessage(incomingMessage);
 		// Get the available space.
-		long freeBuffer = router.getFreeBufferSize();
+		long freeBuffer = router.getFreeBufferSize(bucketId);
 		
 		// Return if it is possible to receive the incoming message, it does not drop any messages
 		return size <= freeBuffer;

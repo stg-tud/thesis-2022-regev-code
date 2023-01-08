@@ -57,13 +57,13 @@ public class FirstContactRouter extends ActiveRouter {
 			return;
 		}
 
-		tryAllMessagesToAllConnections();
+		tryAllMessagesToAllConnections(this.determineNextSendingBucket());
 	}
 
 	@Override
 	protected void transferDone(Connection con) {
 		/* don't leave a copy for the sender */
-		this.deleteMessage(con.getMessage().getId(), false);
+		this.deleteMessage(con.getMessage().getId(),super.determineBucketIDofMessage(con.getMessage()), false);
 	}
 
 	@Override

@@ -73,7 +73,7 @@ public class BufferOccupancyReport extends Report implements UpdateListener {
 		double bo2 = 0.0;
 
 		for (DTNHost h : hosts) {
-			double tmp = h.getBufferOccupancy();
+			double tmp = h.getBufferOccupancy(-1);
 			tmp = (tmp<=100.0)?(tmp):(100.0);
 			bufferOccupancy += tmp;
 			bo2 += (tmp*tmp)/100.0;

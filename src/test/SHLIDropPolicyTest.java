@@ -75,12 +75,12 @@ public class SHLIDropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m2));
+		assertFalse(h0.getMessageCollection(-1).contains(m2));
 		
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m3));
+		assertFalse(h0.getMessageCollection(-1).contains(m3));
 		
 	}
 

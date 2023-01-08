@@ -34,15 +34,15 @@ public class EDropPolicy extends DropPolicy {
 	public boolean makeRoomForMessage(ActiveRouter router, Message incomingMessage) {
 		
 		int size = incomingMessage == null ? 0 : incomingMessage.getSize();
-		
-		if (size > router.getBufferSize()) {
+		int bucketId = router.determineBucketIDofMessage(incomingMessage);
+		if (size > router.getBufferSize(bucketId)) {
 			return false; // message too big for the buffer
 		}
 		
-		long freeBuffer = router.getFreeBufferSize();
+		long freeBuffer = router.getFreeBufferSize(bucketId);
 		
 		while (freeBuffer < size) {
-			Iterator<Message> iter = router.getMessageCollection().iterator();
+			Iterator<Message> iter = router.getMessageCollection(bucketId).iterator();
 			
 			if (!iter.hasNext()) {
 				return false; // There is no message that can be dropped
@@ -60,7 +60,7 @@ public class EDropPolicy extends DropPolicy {
 			
 			// If there is a message to drop
 			if (msg != null) {
-				router.deleteMessage(msg.getId(), true);
+				router.deleteMessage(msg.getId(),bucketId ,true);
 				freeBuffer += msg.getSize();
 			}
 			else {

@@ -51,21 +51,21 @@ public class DistanceDelayReportTest extends TestCase {
 		Message m1 = new Message(h1, h2, "tst1", 1);
 		h1.createNewMessage(m1);
 		clock.advance(1.5);
-		h1.sendMessage("tst1", h2);
+		h1.sendMessage("tst1", h2, h1.getRouter().determineBucketIDofMessage(m1));
 		h2.messageTransferred("tst1", h1);
 
 		Message m2 = new Message(h2,h1, "tst2", 1);
 		h2.createNewMessage(m2);
 		clock.advance(0.5);
-		h2.sendMessage("tst2", h1);
+		h2.sendMessage("tst2", h1,h2.getRouter().determineBucketIDofMessage(m2));
 		h1.messageTransferred("tst2", h2);
 
 		Message m3 = new Message(h1,h3, "tst3", 1);
 		h1.createNewMessage(m3);
 		clock.advance(1.0);
-		h1.sendMessage("tst3", h2);
+		h1.sendMessage("tst3", h2, h1.getRouter().determineBucketIDofMessage(m3));
 		h2.messageTransferred("tst3", h1);
-		h2.sendMessage("tst3", h3);
+		h2.sendMessage("tst3", h3, h1.getRouter().determineBucketIDofMessage(m3));
 		h3.messageTransferred("tst3", h2);
 
 		r.done();

@@ -2,7 +2,7 @@
 
 Scenario.name = PRoPHET-%%ProphetRouter.secondsInTimeUnit%%siu
 Group.router = ProphetRouter
-
+MovementModel.rngSeed = [1]
 ProphetRouter.secondsInTimeUnit = 30
 
 # Define POI data files

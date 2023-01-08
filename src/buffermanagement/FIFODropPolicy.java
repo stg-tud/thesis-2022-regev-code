@@ -28,13 +28,13 @@ public class FIFODropPolicy extends DropPolicy{
 	public boolean makeRoomForMessage(ActiveRouter router, Message incomingMessage) {
 		
 		int size = incomingMessage == null ? 0 : incomingMessage.getSize();
-		
+		int bucketId = router.determineBucketIDofMessage(incomingMessage);
 		// Check if the incoming message size exceeds the buffer capacity
-		if (size > router.getBufferSize()) {
+		if (size > router.getBufferSize(bucketId)) {
 			return false;
 		}
 		
-		long freeBuffer = router.getFreeBufferSize();
+		long freeBuffer = router.getFreeBufferSize(bucketId);
 		
 		// Check if there is enough space to receive the message before sorting the buffer
 		if (freeBuffer >= size) {
@@ -42,7 +42,7 @@ public class FIFODropPolicy extends DropPolicy{
 		}
 		
 		// Sort the messages by receive time
-		ArrayList<Message> messages = new ArrayList<Message>(router.getMessageCollection());
+		ArrayList<Message> messages = new ArrayList<Message>(router.getMessageCollection(bucketId));
 		Collections.sort(messages, new FIFOComparator());
 		
 		/* Delete messages from the buffer until there is enough space */
@@ -58,7 +58,7 @@ public class FIFODropPolicy extends DropPolicy{
 			// Check if the router is sending this message
 			if (this.dropMsgBeingSent || !router.isSending(msg.getId())) {
 				// Delete the message and send signal "drop"
-				router.deleteMessage(msg.getId(), true);
+				router.deleteMessage(msg.getId(),bucketId, true);
 				freeBuffer += msg.getSize();
 			}
 		}

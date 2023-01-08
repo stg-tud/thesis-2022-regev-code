@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import buffermanagement.DropPolicy;
+import buffermanagement.BucketPolicy;
 import routing.util.EnergyModel;
 import routing.util.MessageTransferAcceptPolicy;
 import routing.util.RoutingInfo;
@@ -60,6 +61,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * The drop policy used by the router.
 	 */
 	private DropPolicy dropPolicy;
+
 
 	/**
 	 * Constructor. Creates a new message router based on the settings in
@@ -130,8 +132,11 @@ public abstract class ActiveRouter extends MessageRouter {
 		DTNHost other = con.getOtherNode(getHost());
 		/* do a copy to avoid concurrent modification exceptions
 		 * (startTransfer may remove messages) */
+
+		//TODO achtung, hier könnte es zu starvation kommen
+		int nextSendingBucket = super.determineNextSendingBucket();
 		ArrayList<Message> temp =
-			new ArrayList<Message>(this.getMessageCollection());
+			new ArrayList<Message>(this.getMessageCollection(nextSendingBucket));
 		for (Message m : temp) {
 			if (other == m.getTo()) {
 				if (startTransfer(m, con) == RCV_OK) {
@@ -174,7 +179,8 @@ public abstract class ActiveRouter extends MessageRouter {
 			Message res = new Message(this.getHost(),m.getFrom(),
 					RESPONSE_PREFIX+m.getId(), m.getResponseSize());
 			this.createNewMessage(res);
-			this.getMessage(RESPONSE_PREFIX+m.getId()).setRequest(m);
+			int bucketID = super.determineBucketIDofMessage(m);
+			this.getMessage(RESPONSE_PREFIX+m.getId(),bucketID).setRequest(m);
 		}
 
 		return m;
@@ -215,7 +221,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		else if (deleteDelivered && retVal == DENIED_OLD &&
 				m.getTo() == con.getOtherNode(this.getHost())) {
 			/* final recipient has already received the msg -> delete it */
-			this.deleteMessage(m.getId(), false);
+			this.deleteMessage(m.getId(),determineBucketIDofMessage(m), false);
 		}
 
 		return retVal;
@@ -254,7 +260,7 @@ public abstract class ActiveRouter extends MessageRouter {
 			return TRY_LATER_BUSY; // only one connection at a time
 		}
 
-		if ( hasMessage(m.getId()) || isDeliveredMessage(m) ||
+		if ( hasMessage(m.getId(), super.determineBucketIDofMessage(m)) || isDeliveredMessage(m) ||
 				super.isBlacklistedMessage(m.getId())) {
 			return DENIED_OLD; // already seen this message -> reject it
 		}
@@ -294,22 +300,22 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 		
 		int size = incomingMessage == null ? 0 : incomingMessage.getSize();
-		
-		if (size > this.getBufferSize()) {
+		int bucketID = determineBucketIDofMessage(incomingMessage);
+		if (size > this.getBufferSize(bucketID)) {
 			return false; // message too big for the buffer
 		}
 
-		long freeBuffer = this.getFreeBufferSize();
+		long freeBuffer = this.getFreeBufferSize(bucketID);
 		/* delete messages from the buffer until there's enough space */
 		while (freeBuffer < size) {
-			Message m = getNextMessageToRemove(true); // don't remove msgs being sent
+			Message m = getNextMessageToRemove(true, bucketID); // don't remove msgs being sent
 
 			if (m == null) {
 				return false; // couldn't remove any more messages
 			}
 
 			/* delete message from the buffer as "drop" */
-			deleteMessage(m.getId(), true);
+			deleteMessage(m.getId(), bucketID, true);
 			freeBuffer += m.getSize();
 		}
 
@@ -320,11 +326,17 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * Drops messages whose TTL is less than zero.
 	 */
 	protected void dropExpiredMessages() {
-		Message[] messages = getMessageCollection().toArray(new Message[0]);
-		for (int i=0; i<messages.length; i++) {
-			int ttl = messages[i].getTtl();
-			if (ttl <= 0) {
-				deleteMessage(messages[i].getId(), true);
+		ArrayList<Message[]> messages = new ArrayList<Message[]>();
+		for (int i = 0; i < super.determineNumberofBuckets() ; i++){
+			messages.add(getMessageCollection(i).toArray(new Message[0]));
+		}
+		for (int i=0; i<messages.size(); i++) {
+			for(int j = 0; j < messages.get(i).length; j++ ){
+
+				int ttl = messages.get(i)[j].getTtl();
+				if (ttl <= 0) {
+				deleteMessage(messages.get(i)[j].getId(),i, true);
+			}
 			}
 		}
 	}
@@ -351,8 +363,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * (no messages in buffer or all messages in buffer are being sent and
 	 * exludeMsgBeingSent is true)
 	 */
-	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection();
+	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent, int bucketID) {
+		Collection<Message> messages = this.getMessageCollection(bucketID);
 		Message oldest = null;
 		for (Message m : messages) {
 
@@ -376,7 +388,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * recipient is some host that we're connected to at the moment.
 	 * @return a list of message-connections tuples
 	 */
-	protected List<Tuple<Message, Connection>> getMessagesForConnected() {
+	protected List<Tuple<Message, Connection>> getMessagesForConnected(int bucketID) {
 		if (getNrofMessages() == 0 || getConnections().size() == 0) {
 			/* no messages -> empty list */
 			return new ArrayList<Tuple<Message, Connection>>(0);
@@ -384,7 +396,7 @@ public abstract class ActiveRouter extends MessageRouter {
 
 		List<Tuple<Message, Connection>> forTuples =
 			new ArrayList<Tuple<Message, Connection>>();
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(bucketID)) {
 			for (Connection con : getConnections()) {
 				DTNHost to = con.getOtherNode(getHost());
 				if (m.getTo() == to) {
@@ -476,14 +488,14 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * @return The connections that started a transfer or null if no connection
 	 * accepted a message.
 	 */
-	protected Connection tryAllMessagesToAllConnections(){
+	protected Connection tryAllMessagesToAllConnections(int bucketID){
 		List<Connection> connections = getConnections();
 		if (connections.size() == 0 || this.getNrofMessages() == 0) {
 			return null;
 		}
 
 		List<Message> messages =
-			new ArrayList<Message>(this.getMessageCollection());
+			new ArrayList<Message>(this.getMessageCollection(bucketID));
 		this.sortByQueueMode(messages);
 
 		return tryMessagesToConnections(messages, connections);
@@ -505,8 +517,9 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 
 		@SuppressWarnings(value = "unchecked")
+		int bucketID = super.determineNextSendingBucket();
 		Tuple<Message, Connection> t =
-			tryMessagesForConnected(sortByQueueMode(getMessagesForConnected()));
+			tryMessagesForConnected(sortByQueueMode(getMessagesForConnected(bucketID)));
 
 		if (t != null) {
 			return t.getValue(); // started transfer
@@ -634,8 +647,9 @@ public abstract class ActiveRouter extends MessageRouter {
 			}
 
 			if (removeCurrent) {
+				int bucketID = super.determineBucketIDofMessage(con.getMessage());
 				// if the message being sent was holding excess buffer, free it
-				if (this.getFreeBufferSize() < 0) {
+				if (this.getFreeBufferSize(bucketID) < 0) {
 					this.makeRoomForMessage(null);
 				}
 				sendingConnections.remove(i);
@@ -677,7 +691,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	protected void transferDone(Connection con) { 
 		// Use the connection copy of the message to retrieve the 
 		// local copy of the message and then increment the forward count
-		Message msg = this.getMessage(con.getMessage().getId());
+		Message msg = this.getMessage(con.getMessage().getId(), super.determineBucketIDofMessage(con.getMessage()));
 		if (msg != null)
 			msg.incrementForwardCount();
 	}

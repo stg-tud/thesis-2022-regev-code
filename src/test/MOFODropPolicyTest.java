@@ -75,7 +75,7 @@ public class MOFODropPolicyTest extends AbstractDropPolicyTest {
         assertFalse(mc.getLastFirstDelivery());
         
         assertEquals(m1.getForwardCount(), 1);
-        assertEquals(((Message)h2.getMessageCollection().toArray()[0]).getForwardCount(), 0);
+        assertEquals(((Message)h2.getMessageCollection(-1).toArray()[0]).getForwardCount(), 0);
         
         disconnect(h0);
         h0.connect(h1);
@@ -96,7 +96,7 @@ public class MOFODropPolicyTest extends AbstractDropPolicyTest {
         assertTrue(mc.getLastFirstDelivery());
         
         assertEquals(m1.getForwardCount(), 2);
-        assertEquals(((Message)h2.getMessageCollection().toArray()[0]).getForwardCount(), 0);
+        assertEquals(((Message)h2.getMessageCollection(-1).toArray()[0]).getForwardCount(), 0);
         
 	}
 	
@@ -132,12 +132,12 @@ public class MOFODropPolicyTest extends AbstractDropPolicyTest {
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m3));
+		assertFalse(h0.getMessageCollection(-1).contains(m3));
 		
 		assertTrue(mc.next());
 		assertEquals(mc.getLastType(), mc.TYPE_DELETE);
 		assertTrue(mc.getLastDropped());
-		assertFalse(h0.getMessageCollection().contains(m1));
+		assertFalse(h0.getMessageCollection(-1).contains(m1));
 		
 	}
 

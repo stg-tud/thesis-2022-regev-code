@@ -324,8 +324,8 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 */
 	private void deleteAckedMessages() {
 		for (String id : this.ackedMessageIds) {
-			if (this.hasMessage(id) && !isSending(id)) {
-				this.deleteMessage(id, false);
+			if (this.hasMessage(id, super.determineBucketIDofMessageID(id)) && !isSending(id)) {
+				this.deleteMessage(id,super.determineBucketIDofMessageID(id) ,false);
 			}
 		}
 	}
@@ -353,7 +353,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 		/* was the message delivered to the final recipient? */
 		if (m.getTo() == con.getOtherNode(getHost())) {
 			this.ackedMessageIds.add(m.getId()); // yes, add to ACKed messages
-			this.deleteMessage(m.getId(), false); // delete from buffer
+			this.deleteMessage(m.getId(),super.determineBucketIDofMessage(m), false); // delete from buffer
 		}
 	}
 
@@ -396,8 +396,8 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 * (no messages in buffer or all messages in buffer are being sent and
 	 * exludeMsgBeingSent is true)
 	 */
-	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection();
+	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent, int BucketID) {
+		Collection<Message> messages = this.getMessageCollection(BucketID);
 		List<Message> validMessages = new ArrayList<Message>();
 
 		for (Message m : messages) {
@@ -408,7 +408,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 		}
 
 		Collections.sort(validMessages,
-				new MaxPropComparator(this.calcThreshold()));
+				new MaxPropComparator(this.calcThreshold(BucketID)));
 
 		return validMessages.get(validMessages.size()-1); // return last message
 	}
@@ -425,7 +425,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 			return;
 		}
 
-		tryOtherMessages();
+		tryOtherMessages(super.determineNextSendingBucket());
 	}
 
 	/**
@@ -438,7 +438,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 * @return The cost of the cheapest path to the destination or
 	 * Double.MAX_VALUE if such a path doesn't exist
 	 */
-	public double getCost(DTNHost from, DTNHost to) {
+	public double getCost(DTNHost from, DTNHost to, int BucketID) {
 		/* check if the cached values are OK */
 		if (this.costsForMessages == null || lastCostFrom != from) {
 			/* cached costs are invalid -> calculate new costs */
@@ -448,7 +448,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 			/* calculate paths only to nodes we have messages to
 			 * (optimization) */
 			Set<Integer> toSet = new HashSet<Integer>();
-			for (Message m : getMessageCollection()) {
+			for (Message m : getMessageCollection(BucketID)) {
 				toSet.add(m.getTo().getAddress());
 			}
 
@@ -470,11 +470,11 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 * hop counts and their delivery probability
 	 * @return The return value of {@link #tryMessagesForConnected(List)}
 	 */
-	private Tuple<Message, Connection> tryOtherMessages() {
+	private Tuple<Message, Connection> tryOtherMessages(int BucketID) {
 		List<Tuple<Message, Connection>> messages =
 			new ArrayList<Tuple<Message, Connection>>();
 
-		Collection<Message> msgCollection = getMessageCollection();
+		Collection<Message> msgCollection = getMessageCollection(BucketID);
 
 		/* for all connected hosts that are not transferring at the moment,
 		 * collect all the messages that could be sent */
@@ -489,7 +489,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 			for (Message m : msgCollection) {
 				/* skip messages that the other host has or that have
 				 * passed the other host */
-				if (othRouter.hasMessage(m.getId()) ||
+				if (othRouter.hasMessage(m.getId(), BucketID) ||
 						m.getHops().contains(other)) {
 					continue;
 				}
@@ -503,7 +503,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 
 		/* sort the message-connection tuples according to the criteria
 		 * defined in MaxPropTupleComparator */
-		Collections.sort(messages, new MaxPropTupleComparator(calcThreshold()));
+		Collections.sort(messages, new MaxPropTupleComparator(calcThreshold(BucketID)));
 		return tryMessagesForConnected(messages);
 	}
 
@@ -514,9 +514,9 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 * to make testing easier.
 	 * @return current threshold value (hop count) for the buffer's split
 	 */
-	public int calcThreshold() {
+	public int calcThreshold(int BucketID) {
 		/* b, x and p refer to respective variables in the paper's equations */
-		long b = this.getBufferSize();
+		long b = this.getBufferSize(BucketID);
 		long x = this.avgTransferredBytes;
 		long p;
 
@@ -538,7 +538,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 
 		/* creates a copy of the messages list, sorted by hop count */
 		ArrayList<Message> msgs = new ArrayList<Message>();
-		msgs.addAll(getMessageCollection());
+		msgs.addAll(getMessageCollection(BucketID));
 		if (msgs.size() == 0) {
 			return 0; // no messages -> no need for threshold
 		}
@@ -635,8 +635,8 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 
 			/* both messages have more than threshold hops -> cost of the
 			 * message path is used for ordering */
-			p1 = getCost(from1, msg1.getTo());
-			p2 = getCost(from2, msg2.getTo());
+			p1 = getCost(from1, msg1.getTo(), from1.getRouter().determineBucketIDofMessage(msg1));
+			p2 = getCost(from2, msg2.getTo(), from2.getRouter().determineBucketIDofMessage(msg2));
 
 			/* the one with lower cost should be sent first */
 			if (p1-p2 == 0) {

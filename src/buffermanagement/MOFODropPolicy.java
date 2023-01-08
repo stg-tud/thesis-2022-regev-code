@@ -28,12 +28,12 @@ public class MOFODropPolicy extends DropPolicy {
 	public boolean makeRoomForMessage(ActiveRouter router, Message incomingMessage) {
 		
 		int size = incomingMessage == null ? 0 : incomingMessage.getSize();
-		
-		if (size > router.getBufferSize()) {
+		int bucketId = router.determineBucketIDofMessage(incomingMessage);
+		if (size > router.getBufferSize(bucketId)) {
 			return false; // message too big for the buffer
 		}
 		
-		long freeBuffer = router.getFreeBufferSize();
+		long freeBuffer = router.getFreeBufferSize(bucketId);
 		
 		// Check if there is enough space to receive the message before sorting the buffer
 		if (freeBuffer >= size) {
@@ -41,7 +41,7 @@ public class MOFODropPolicy extends DropPolicy {
 		}
 		
 		// Sort the messages by forward count
-		ArrayList<Message> messages = new ArrayList<Message>(router.getMessageCollection());
+		ArrayList<Message> messages = new ArrayList<Message>(router.getMessageCollection(bucketId));
 		Collections.sort(messages, new MOFOComparator());
 		
 		/* Delete messages from the buffer until there is enough space */
@@ -57,7 +57,7 @@ public class MOFODropPolicy extends DropPolicy {
 			// Check if the router is sending this message
 			if (this.dropMsgBeingSent || !router.isSending(msg.getId())) {
 				// Delete the message and send signal "drop"
-				router.deleteMessage(msg.getId(), true);
+				router.deleteMessage(msg.getId(),bucketId, true);
 				freeBuffer += msg.getSize();
 			}
 		}

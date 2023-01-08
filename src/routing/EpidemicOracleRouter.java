@@ -55,8 +55,8 @@ public class EpidemicOracleRouter extends ActiveRouter {
 			DTNHost peer = con.getOtherNode(getHost());
 			List<Message> newMessages = new ArrayList<Message>();
 
-			for (Message m : peer.getMessageCollection()) {
-				if (!this.hasMessage(m.getId())) {
+			for (Message m : peer.getMessageCollection(-1)) {
+				if (!this.hasMessage(m.getId(), peer.getRouter().determineBucketIDofMessage(m))) {
 					newMessages.add(m);
 				}
 			}
@@ -98,14 +98,14 @@ public class EpidemicOracleRouter extends ActiveRouter {
 	 * @param id ID of the message to be removed
 	 */
 	public void removeDeliveredMessage(String id) {
-		if (this.hasMessage(id)) {
+		if (this.hasMessage(id, super.determineBucketIDofMessageID(id))) {
 			for (Connection c : this.sendingConnections) {
 				/* if sending the message-to-be-removed, cancel transfer */
 				if (c.getMessage().getId().equals(id)) {
 					c.abortTransfer();
 				}
 			}
-			this.deleteMessage(id, false);
+			this.deleteMessage(id,super.determineBucketIDofMessageID(id), false);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 	}
 
 	protected int checkReceiving(Message m) {
-		if ( isIncomingMessage(m.getId()) || hasMessage(m.getId()) ||
+		if ( isIncomingMessage(m.getId()) || hasMessage(m.getId(),super.determineBucketIDofMessage(m)) ||
 				isDeliveredMessage(m) ){
 			return DENIED_OLD; // already seen this message -> reject it
 		}
@@ -156,7 +156,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 
 		/* was the message delivered to the final recipient? */
 		if (m.getTo() == con.getOtherNode(getHost())) {
-			this.deleteMessage(m.getId(), false);
+			this.deleteMessage(m.getId(), super.determineBucketIDofMessage(m), false);
 		}
 	}
 

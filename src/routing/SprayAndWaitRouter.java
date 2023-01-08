@@ -63,8 +63,8 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		assert nrofCopies != null : "Not a SnW message: " + msg;
 
 		if (isBinary) {
-			/* in binary S'n'W the receiving node gets ceil(n/2) copies */
-			nrofCopies = (int)Math.ceil(nrofCopies/2.0);
+			/* in binary S'n'W the receiving node gets floor(n/2) copies */
+			nrofCopies = (int)Math.floor(nrofCopies/2.0);
 		}
 		else {
 			/* in standard S'n'W the receiving node gets only single copy */
@@ -115,7 +115,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 	protected List<Message> getMessagesWithCopiesLeft() {
 		List<Message> list = new ArrayList<Message>();
 
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(-1)) {
 			Integer nrofCopies = (Integer)m.getProperty(MSG_COUNT_PROPERTY);
 			assert nrofCopies != null : "SnW message " + m + " didn't have " +
 				"nrof copies property!";
@@ -139,7 +139,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		Integer nrofCopies;
 		String msgId = con.getMessage().getId();
 		/* get this router's copy of the message */
-		Message msg = getMessage(msgId);
+		Message msg = getMessage(msgId, this.determineBucketIDofMessageID(msgId));
 
 		if (msg == null) { // message has been dropped from the buffer after..
 			return; // ..start of transfer -> no need to reduce amount of copies
@@ -148,7 +148,8 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		/* reduce the amount of copies left */
 		nrofCopies = (Integer)msg.getProperty(MSG_COUNT_PROPERTY);
 		if (isBinary) {
-			nrofCopies /= 2;
+			/* in binary S'n'W the sending node keeps ceil(n/2) copies */
+			nrofCopies = (int)Math.ceil(nrofCopies/2.0);
 		}
 		else {
 			nrofCopies--;

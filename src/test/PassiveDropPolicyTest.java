@@ -64,7 +64,7 @@ public class PassiveDropPolicyTest extends AbstractDropPolicyTest {
 		checkCreates(1);
 		advanceWorld(1);
 		
-		assertTrue(h0.getMessageCollection().contains(m1));
+		assertTrue(h0.getMessageCollection(-1).contains(m1));
 	}
 
 }

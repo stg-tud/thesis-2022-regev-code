@@ -283,7 +283,7 @@ public class ProphetV2Router extends ActiveRouter {
 		List<Tuple<Message, Connection>> messages =
 			new ArrayList<Tuple<Message, Connection>>();
 
-		Collection<Message> msgCollection = getMessageCollection();
+		Collection<Message> msgCollection = getMessageCollection(this.determineNextSendingBucket());
 
 		/* for all connected hosts collect all messages that have a higher
 		   probability of delivery by the other host */
@@ -296,7 +296,7 @@ public class ProphetV2Router extends ActiveRouter {
 			}
 
 			for (Message m : msgCollection) {
-				if (othRouter.hasMessage(m.getId())) {
+				if (othRouter.hasMessage(m.getId(),this.determineBucketIDofMessage(m))) {
 					continue; // skip messages that the other one has
 				}
 				if((othRouter.getPredFor(m.getTo()) >= getPredFor(m.getTo())))
