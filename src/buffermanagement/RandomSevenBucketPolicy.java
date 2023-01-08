@@ -6,14 +6,14 @@ import core.Message;
 import core.Settings;
 import routing.MessageRouter;
 
-public class OddEvenPolicy extends BucketPolicy {
-    public OddEvenPolicy(Settings s) {
+public class RandomSevenBucketPolicy extends BucketPolicy {
+    public RandomSevenBucketPolicy(Settings s) {
 		super(s);
 		// It doesn't need specific settings.
 	}
     public int determineBucketIDofMessage(MessageRouter router, Message incomingMessage){
         if(incomingMessage == null){
-            System.out.println(incomingMessage);
+            //System.out.println(incomingMessage);
             return 0;
         }
         /* 

@@ -2,5 +2,5 @@ Scenario.name = SprayAndWait
 Group.router = SprayAndWaitRouter
 SprayAndWaitRouter.nrofCopies = 10
 SprayAndWaitRouter.binaryMode = true
-Group.bucketPolicy = OddEvenPolicy
+Group.bucketPolicy = RandomSevenBucketPolicy
 MovementModel.rngSeed = [1]
