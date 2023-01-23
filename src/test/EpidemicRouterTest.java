@@ -331,7 +331,7 @@ public class EpidemicRouterTest extends AbstractRouterTest {
 		Message m2 = new Message(h1,h3, msgId1, BUFFER_SIZE/3);
 		h1.createNewMessage(m2);
 		assertEquals(1, h1.getNrofMessages()); // message should replace dummy
-		assertEquals(msgId1, h1.getMessageCollection(-1).iterator().next().getId());
+		assertEquals(msgId1, h1.getMessageCollection().iterator().next().getId());
 
 		mc.reset();
 
@@ -412,7 +412,7 @@ public class EpidemicRouterTest extends AbstractRouterTest {
 		assertTrue(mc.next());
 		assertEquals(mc.TYPE_CREATE, mc.getLastType());
 		assertEquals(msgId3, mc.getLastMsg().getId());
-		assertTrue(h1.getBufferOccupancy(h1.getRouter().determineBucketIDofMessage(m3)) > 100); // buffer occupancy > 100%
+		assertTrue(h1.getBufferOccupancy() > 100); // buffer occupancy > 100%
 
 		assertFalse(mc.next());
 
@@ -429,7 +429,7 @@ public class EpidemicRouterTest extends AbstractRouterTest {
 		assertEquals(msgId1, mc.getLastMsg().getId());
 
 		 // buffer occupancy should drop back under 100 %
-		assertTrue(h1.getBufferOccupancy(h1.getRouter().determineBucketIDofMessage(m3)) < 100);
+		assertTrue(h1.getBufferOccupancy() < 100);
 
 		// should start transferring msgId3
 		assertTrue(mc.next());

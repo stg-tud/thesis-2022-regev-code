@@ -22,7 +22,7 @@ public class NodeMessageFilter implements NodeFilter {
 	}
 
 	public boolean filterNode(DTNHost node) {
-		return node.getRouter().hasMessage(messageId, node.getRouter().determineBucketIDofMessageID(messageId));
+		return node.getRouter().hasMessage(messageId);
 	}
 
 	@Override

@@ -89,7 +89,7 @@ public class MessageAvailabilityReport extends MessageLocationReport {
 			msgIds = new HashSet<String>();
 
 			/* add own messages */
-			for (Message m : host.getMessageCollection(-1)) {
+			for (Message m : host.getMessageCollection()) {
 				if (!isTracked(m)) {
 					continue;
 				}
@@ -98,7 +98,7 @@ public class MessageAvailabilityReport extends MessageLocationReport {
 			/* add all peer messages */
 			for (Connection c : host.getConnections()) {
 				DTNHost peer = c.getOtherNode(host);
-				for (Message m : peer.getMessageCollection(-1)) {
+				for (Message m : peer.getMessageCollection()) {
 					if (!isTracked(m)) {
 						continue;
 					}

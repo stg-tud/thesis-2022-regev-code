@@ -223,8 +223,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * Returns the messages in a collection.
 	 * @return Messages in a collection
 	 */
-	public Collection<Message> getMessageCollection(int bucketID) {
-		return this.router.getMessageCollection(bucketID);
+	public Collection<Message> getMessageCollection() {
+		return this.router.getMessageCollection();
 	}
 
 	/**
@@ -241,9 +241,9 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * space that could be freed.
 	 * @return Buffer occupancy percentage
 	 */
-	public double getBufferOccupancy(int bucketId) {
-		long bSize = router.getBufferSize(bucketId);
-		long freeBuffer = router.getFreeBufferSize(bucketId);
+	public double getBufferOccupancy() {
+		long bSize = router.getBufferSize();
+		long freeBuffer = router.getFreeBufferSize();
 		return 100*((bSize-freeBuffer)/(bSize * 1.0));
 	}
 
@@ -441,8 +441,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * @param id Identifier of the message
 	 * @param to Host the message should be sent to
 	 */
-	public void sendMessage(String id, DTNHost to, int bucketID) {
-		this.router.sendMessage(id, to, bucketID);
+	public void sendMessage(String id, DTNHost to) {
+		this.router.sendMessage(id, to);
 	}
 
 	/**
@@ -508,8 +508,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * (e.g. the message got delivered to final destination). This effects the
 	 * way the removing is reported to the message listeners.
 	 */
-	public void deleteMessage(String id,int bucketID ,boolean drop) {
-		this.router.deleteMessage(id, bucketID, drop);
+	public void deleteMessage(String id, boolean drop) {
+		this.router.deleteMessage(id, drop);
 	}
 
 	/**

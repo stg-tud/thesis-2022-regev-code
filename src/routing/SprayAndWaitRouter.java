@@ -77,7 +77,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 
 	@Override
 	public boolean createNewMessage(Message msg) {
-		makeRoomForNewMessage(msg);
+		makeRoomForNewMessage(msg.getSize());
 
 		msg.setTtl(this.msgTtl);
 		msg.addProperty(MSG_COUNT_PROPERTY, new Integer(initialNrofCopies));
@@ -115,7 +115,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 	protected List<Message> getMessagesWithCopiesLeft() {
 		List<Message> list = new ArrayList<Message>();
 
-		for (Message m : getMessageCollection(-1)) {
+		for (Message m : getMessageCollection()) {
 			Integer nrofCopies = (Integer)m.getProperty(MSG_COUNT_PROPERTY);
 			assert nrofCopies != null : "SnW message " + m + " didn't have " +
 				"nrof copies property!";
@@ -139,7 +139,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 		Integer nrofCopies;
 		String msgId = con.getMessage().getId();
 		/* get this router's copy of the message */
-		Message msg = getMessage(msgId, this.determineBucketIDofMessageID(msgId));
+		Message msg = getMessage(msgId);
 
 		if (msg == null) { // message has been dropped from the buffer after..
 			return; // ..start of transfer -> no need to reduce amount of copies
