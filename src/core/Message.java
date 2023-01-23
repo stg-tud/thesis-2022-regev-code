@@ -248,7 +248,7 @@ public class Message implements Comparable<Message> {
 	 * Returns a string representation of the message
 	 * @return a string representation of the message
 	 */
-	public String toString () {
+	public String toString() {
 		return id;
 	}
 
