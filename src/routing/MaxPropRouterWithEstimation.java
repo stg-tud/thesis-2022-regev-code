@@ -396,8 +396,8 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 	 * (no messages in buffer or all messages in buffer are being sent and
 	 * exludeMsgBeingSent is true)
 	 */
-	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection();
+	protected Message getNextMessageToRemove(int bucket, boolean excludeMsgBeingSent) {
+		Collection<Message> messages = this.getMessageCollection(bucket);
 		List<Message> validMessages = new ArrayList<Message>();
 
 		for (Message m : messages) {
@@ -448,7 +448,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 			/* calculate paths only to nodes we have messages to
 			 * (optimization) */
 			Set<Integer> toSet = new HashSet<Integer>();
-			for (Message m : getMessageCollection()) {
+			for (Message m : getMessageCollection(-1)) {
 				toSet.add(m.getTo().getAddress());
 			}
 
@@ -474,7 +474,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 		List<Tuple<Message, Connection>> messages =
 			new ArrayList<Tuple<Message, Connection>>();
 
-		Collection<Message> msgCollection = getMessageCollection();
+		Collection<Message> msgCollection = getMessageCollection(-1);
 
 		/* for all connected hosts that are not transferring at the moment,
 		 * collect all the messages that could be sent */
@@ -538,7 +538,7 @@ public class MaxPropRouterWithEstimation extends ActiveRouter {
 
 		/* creates a copy of the messages list, sorted by hop count */
 		ArrayList<Message> msgs = new ArrayList<Message>();
-		msgs.addAll(getMessageCollection());
+		msgs.addAll(getMessageCollection(-1));
 		if (msgs.size() == 0) {
 			return 0; // no messages -> no need for threshold
 		}

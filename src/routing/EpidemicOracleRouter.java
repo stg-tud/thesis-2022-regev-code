@@ -55,7 +55,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 			DTNHost peer = con.getOtherNode(getHost());
 			List<Message> newMessages = new ArrayList<Message>();
 
-			for (Message m : peer.getMessageCollection()) {
+			for (Message m : peer.getMessageCollection(-1)) {
 				if (!this.hasMessage(m.getId())) {
 					newMessages.add(m);
 				}
@@ -80,7 +80,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 	}
 
 	public boolean createNewMessage(Message m) {
-		boolean ok = super.createNewMessage(m);
+		boolean ok = super.createNewMessage(m,false);
 
 		if (!ok) {
 			throw new SimError("Can't create message " + m);
@@ -138,7 +138,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 		}
 
 		/* remove oldest messages but not the ones being sent */
-		if (!makeRoomForMessage(m.getSize())) {
+		if (!makeRoomForMessage((int) m.getProperty(BUCKET_ID),m.getSize())) {
 			return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
 		}
 

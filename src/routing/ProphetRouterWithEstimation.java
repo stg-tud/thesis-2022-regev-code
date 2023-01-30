@@ -425,7 +425,7 @@ public class ProphetRouterWithEstimation extends ActiveRouter {
 		List<Tuple<Message, Connection>> messages =
 			new ArrayList<Tuple<Message, Connection>>();
 
-		Collection<Message> msgCollection = getMessageCollection();
+		Collection<Message> msgCollection = getMessageCollection(-1);
 
 		/* for all connected hosts collect all messages that have a higher
 		   probability of delivery by the other host */

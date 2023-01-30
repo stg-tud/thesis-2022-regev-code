@@ -83,8 +83,8 @@ public class WaveRouter extends ActiveRouter {
 	 * Returns the oldest message that has been already sent forward
 	 */
 	@Override
-	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection();
+	protected Message getNextMessageToRemove(int bucket, boolean excludeMsgBeingSent) {
+		Collection<Message> messages = this.getMessageCollection(bucket);
 		Message oldest = null;
 
 		for (Message m : messages) {

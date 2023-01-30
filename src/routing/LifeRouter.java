@@ -93,7 +93,7 @@ public class LifeRouter extends ActiveRouter {
 		this.tryAllMessagesToAllConnections();
 
 		/* see if need to drop some messages... */
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(-1)) {
 			peerMsgCount = getPeerMessageCount(m);
 			if (peerMsgCount < this.countRange[0] ||
 					peerMsgCount > this.countRange[1]) {
