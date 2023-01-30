@@ -44,6 +44,11 @@ public abstract class ActiveRouter extends MessageRouter {
 
 	/** prefix of all response message IDs */
 	public static final String RESPONSE_PREFIX = "R_";
+
+	/**
+	 * Bucket Identifier for message Property
+	 */
+	public static final String BUCKET_ID = "Bucket";
 	/** how often TTL check (discarding old messages) is performed */
 	public static int TTL_CHECK_INTERVAL = 60;
 	/** connection(s) that are currently used for sending */
@@ -131,8 +136,26 @@ public abstract class ActiveRouter extends MessageRouter {
 		return super.createNewMessage(m);
 	}
 
+	/**
+	 * Function to determine the Bucket for this Message
+	 * @param m incomign Message
+	 */
+	public void determineBucket(Message m){
+		//todo logic to determine Bucket
+		int determinedBucket = 0;
+		if(m.getProperty(BUCKET_ID) == null)
+		{
+			m.addProperty(BUCKET_ID, determinedBucket);
+		}
+		else{
+			m.updateProperty(BUCKET_ID, determinedBucket);
+		}
+		
+	}
+
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
+		determineBucket(m);
 		int recvCheck = checkReceiving(m, from);
 		if (recvCheck != RCV_OK) {
 			return recvCheck;
