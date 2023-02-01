@@ -12,7 +12,7 @@ public abstract class BucketAssignmentPolicy {
     public BucketAssignmentPolicy(Settings s){
     }
 
-    public abstract Integer assignBucket(Message m, DTNHost currentHost);
+    public abstract Integer assignBucket(Message m, DTNHost currentHost, Boolean receivedMessage);
 
     public Integer getBucketCount(){
         return this.BucketCount;

@@ -78,7 +78,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 	@Override
 	public boolean createNewMessage(Message msg, Boolean determinedBucket) {
 		if(!determinedBucket){
-			determineBucket(msg);
+			determineBucket(msg,false);
 		}
 		makeRoomForNewMessage((int)msg.getProperty(BUCKET_ID),msg.getSize());
 

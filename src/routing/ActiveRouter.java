@@ -130,7 +130,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	@Override
 	public boolean createNewMessage(Message m,Boolean determinedBucket) {
 		if(!determinedBucket){
-		determineBucket(m);}
+		determineBucket(m,false);}
 		makeRoomForNewMessage((int) m.getProperty(BUCKET_ID), m.getSize());
 		return super.createNewMessage(m, true);
 	}
@@ -139,13 +139,13 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * Function to determine the Bucket for this Message
 	 * @param m incomign Message
 	 */
-	public void determineBucket(Message m){
-		super.determineBucket(m);
+	public void determineBucket(Message m, Boolean receivedMessage){
+		super.determineBucket(m,receivedMessage);
 	}
 
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
-		determineBucket(m);
+		determineBucket(m,true);
 		if((int)m.getProperty(BUCKET_ID) == -1){
 			return DENIED_UNSPECIFIED;
 		}

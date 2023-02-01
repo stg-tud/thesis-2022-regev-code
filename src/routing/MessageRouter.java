@@ -612,7 +612,7 @@ public abstract class MessageRouter {
 	 */
 	public boolean createNewMessage(Message m, Boolean determinedBucket) {
 		if(!determinedBucket){
-		determineBucket(m);}
+		determineBucket(m,false);}
 		m.setTtl(this.msgTtl);
 		addToMessages(m, true);
 		return true;
@@ -806,8 +806,8 @@ public abstract class MessageRouter {
 	 * Function to determine the Bucket for this Message
 	 * @param m incomign Message
 	 */
-	public void determineBucket(Message m){
-		int determinedBucket = this.bucketPolicy.assignBucket(m,this.getHost());
+	public void determineBucket(Message m, Boolean receivedMessage){
+		int determinedBucket = this.bucketPolicy.assignBucket(m,this.getHost(),receivedMessage);
 		if(m.getProperty(BUCKET_ID) == null)
 		{
 			m.addProperty(BUCKET_ID, determinedBucket);

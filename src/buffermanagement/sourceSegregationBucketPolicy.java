@@ -12,7 +12,7 @@ public class sourceSegregationBucketPolicy extends BucketAssignmentPolicy {
     }
 
     @Override
-    public Integer assignBucket(Message m, DTNHost currentHost) {
+    public Integer assignBucket(Message m, DTNHost currentHost, Boolean receivedMessage) {
         if(m.getFrom().getAddress() % 2 == 0 || m.getFrom().equals(currentHost)){
             return 0;
         }

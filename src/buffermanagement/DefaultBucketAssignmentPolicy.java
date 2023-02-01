@@ -10,7 +10,7 @@ public class DefaultBucketAssignmentPolicy extends BucketAssignmentPolicy{
         this.BucketCount = 1;
     }
     @Override
-    public Integer assignBucket(Message m, DTNHost currentHost) {
+    public Integer assignBucket(Message m, DTNHost currentHost, Boolean ReceivedMessage) {
         return 0;
     }
 
