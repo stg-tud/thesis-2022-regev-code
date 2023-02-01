@@ -199,7 +199,6 @@ public abstract class MessageRouter {
 	 * @param mListeners The message listeners
 	 */
 	public void init(DTNHost host, List<MessageListener> mListeners) {
-		System.out.println(CountBuckets);
 		this.incomingMessages = new HashMap<String, Message>();
 		this.messages = new HashMap<Integer, HashMap<String, Message>>();
 		for(int i=0; i < this.CountBuckets; i++){
