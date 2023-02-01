@@ -146,6 +146,9 @@ public abstract class ActiveRouter extends MessageRouter {
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
 		determineBucket(m);
+		if((int)m.getProperty(BUCKET_ID) == -1){
+			return DENIED_UNSPECIFIED;
+		}
 		int recvCheck = checkReceiving(m, from);
 		if (recvCheck != RCV_OK) {
 			return recvCheck;

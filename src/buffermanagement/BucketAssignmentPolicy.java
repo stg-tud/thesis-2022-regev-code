@@ -1,16 +1,21 @@
 package buffermanagement;
 
+import core.DTNHost;
 import core.Message;
+import core.Settings;
 
 public abstract class BucketAssignmentPolicy {
-    
+    int BucketCount;
     /**
      * Constructor
      */
-    public BucketAssignmentPolicy(){
+    public BucketAssignmentPolicy(Settings s){
     }
 
-    public abstract int assignBucket(Message m);
+    public abstract Integer assignBucket(Message m, DTNHost currentHost);
 
+    public Integer getBucketCount(){
+        return this.BucketCount;
+    }
 
 }

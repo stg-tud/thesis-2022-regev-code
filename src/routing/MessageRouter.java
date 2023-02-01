@@ -111,14 +111,14 @@ public abstract class MessageRouter {
 	//* current occupancy of the buffer by Bucket*/
 	private HashMap<Integer,Long> bufferOccupancyByBucket;
 	/** Count of Buckets */
-	private int CountBuckets = 1 ;
+	private int CountBuckets;
 	/** TTL for all messages */
 	protected int msgTtl;
 	/** Queue mode for sending messages */
 	private int sendQueueMode;
 
 	/** Setting String for BucketAssignmentPolicy */
-	public static final String BUCKET_POLICY_S = "bucketPolicy";
+	public static final String BUCKET_POLICY_S = "BucketPolicy";
 
 	public BucketAssignmentPolicy bucketPolicy;
 
@@ -145,9 +145,9 @@ public abstract class MessageRouter {
 			this.bucketPolicy = (BucketAssignmentPolicy) s.createIntializedObject("buffermanagement." + bucketPolicyClass);
 		}
 		else {
-			this.bucketPolicy = new buffermanagement.DefaultBucketAssignmentPolicy();
+			this.bucketPolicy = new buffermanagement.DefaultBucketAssignmentPolicy(s);
 		}
-
+		this.CountBuckets = this.bucketPolicy.getBucketCount();
 		//todo currently equal distribution of bucket space -> make generic
 		// initializes buffer size by bucket
 		// if Integer Max value it simulates "infinite Buffer"
@@ -199,6 +199,7 @@ public abstract class MessageRouter {
 	 * @param mListeners The message listeners
 	 */
 	public void init(DTNHost host, List<MessageListener> mListeners) {
+		System.out.println(CountBuckets);
 		this.incomingMessages = new HashMap<String, Message>();
 		this.messages = new HashMap<Integer, HashMap<String, Message>>();
 		for(int i=0; i < this.CountBuckets; i++){
@@ -225,6 +226,7 @@ public abstract class MessageRouter {
 		this.msgTtl = r.msgTtl;
 		this.sendQueueMode = r.sendQueueMode;
 		this.bucketPolicy = r.bucketPolicy;
+		this.CountBuckets = r.CountBuckets;
 		this.applications = new HashMap<String, Collection<Application>>();
 		for (Collection<Application> apps : r.applications.values()) {
 			for (Application app : apps) {
@@ -805,7 +807,7 @@ public abstract class MessageRouter {
 	 * @param m incomign Message
 	 */
 	public void determineBucket(Message m){
-		int determinedBucket = this.bucketPolicy.assignBucket(m);
+		int determinedBucket = this.bucketPolicy.assignBucket(m,this.getHost());
 		if(m.getProperty(BUCKET_ID) == null)
 		{
 			m.addProperty(BUCKET_ID, determinedBucket);
