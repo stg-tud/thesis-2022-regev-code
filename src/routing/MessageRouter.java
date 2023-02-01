@@ -23,6 +23,7 @@ import core.SimClock;
 import core.SimError;
 import routing.util.RoutingInfo;
 import util.Tuple;
+import buffermanagement.BucketAssignmentPolicy;
 
 /**
  * Superclass for message routers.
@@ -116,6 +117,11 @@ public abstract class MessageRouter {
 	/** Queue mode for sending messages */
 	private int sendQueueMode;
 
+	/** Setting String for BucketAssignmentPolicy */
+	public static final String BUCKET_POLICY_S = "bucketPolicy";
+
+	public BucketAssignmentPolicy bucketPolicy;
+
 	/** applications attached to the host */
 	private HashMap<String, Collection<Application>> applications = null;
 
@@ -133,6 +139,15 @@ public abstract class MessageRouter {
 		if (s.contains(B_SIZE_S)) {
 			this.bufferSize = s.getLong(B_SIZE_S);
 		}
+
+		if (s.contains(BUCKET_POLICY_S)) {
+			String bucketPolicyClass = s.getSetting(BUCKET_POLICY_S);
+			this.bucketPolicy = (BucketAssignmentPolicy) s.createIntializedObject("buffermanagement." + bucketPolicyClass);
+		}
+		else {
+			this.bucketPolicy = new buffermanagement.DefaultBucketAssignmentPolicy();
+		}
+
 		//todo currently equal distribution of bucket space -> make generic
 		// initializes buffer size by bucket
 		// if Integer Max value it simulates "infinite Buffer"
@@ -209,7 +224,7 @@ public abstract class MessageRouter {
 		this.bufferSizeByBucket = r.bufferSizeByBucket;
 		this.msgTtl = r.msgTtl;
 		this.sendQueueMode = r.sendQueueMode;
-
+		this.bucketPolicy = r.bucketPolicy;
 		this.applications = new HashMap<String, Collection<Application>>();
 		for (Collection<Application> apps : r.applications.values()) {
 			for (Application app : apps) {
@@ -790,8 +805,7 @@ public abstract class MessageRouter {
 	 * @param m incomign Message
 	 */
 	public void determineBucket(Message m){
-		//todo logic to determine Bucket
-		int determinedBucket = 0;
+		int determinedBucket = this.bucketPolicy.assignBucket(m);
 		if(m.getProperty(BUCKET_ID) == null)
 		{
 			m.addProperty(BUCKET_ID, determinedBucket);
