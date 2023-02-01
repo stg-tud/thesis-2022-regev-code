@@ -4,6 +4,7 @@
  */
 package routing;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import core.SimClock;
 import core.SimError;
 import routing.util.RoutingInfo;
 import util.Tuple;
+import buffermanagement.BucketAssignmentPolicy;
 
 /**
  * Superclass for message routers.
@@ -57,6 +59,11 @@ public abstract class MessageRouter {
 	/** Setting string for FIFO queue mode */
 	public static final String STR_Q_MODE_FIFO = "FIFO";
 
+	/**
+	 * Bucket Identifier for message Property
+	 */
+	public static final String BUCKET_ID = "Bucket";
+
 	/* Return values when asking to start a transmission:
 	 * RCV_OK (0) means that the host accepts the message and transfer started,
 	 * values < 0 mean that the  receiving host will not accept this
@@ -88,7 +95,7 @@ public abstract class MessageRouter {
 	/** The messages being transferred with msgID_hostName keys */
 	private HashMap<String, Message> incomingMessages;
 	/** The messages this router is carrying */
-	private HashMap<String, Message> messages;
+	private HashMap<Integer, HashMap<String, Message>> messages;
 	/** The messages this router has received as the final recipient */
 	private HashMap<String, Message> deliveredMessages;
 	/** The messages that Applications on this router have blacklisted */
@@ -97,12 +104,23 @@ public abstract class MessageRouter {
 	private DTNHost host;
 	/** size of the buffer */
 	private long bufferSize;
+	/** Size of the buffer by Bucket */
+	private HashMap<Integer,Long> bufferSizeByBucket;
 	/** current occupancy of the buffer */
 	private long bufferOccupancy;
+	//* current occupancy of the buffer by Bucket*/
+	private HashMap<Integer,Long> bufferOccupancyByBucket;
+	/** Count of Buckets */
+	private int CountBuckets;
 	/** TTL for all messages */
 	protected int msgTtl;
 	/** Queue mode for sending messages */
 	private int sendQueueMode;
+
+	/** Setting String for BucketAssignmentPolicy */
+	public static final String BUCKET_POLICY_S = "BucketPolicy";
+
+	public BucketAssignmentPolicy bucketPolicy;
 
 	/** applications attached to the host */
 	private HashMap<String, Collection<Application>> applications = null;
@@ -117,11 +135,31 @@ public abstract class MessageRouter {
 		this.bufferSize = Integer.MAX_VALUE; // defaults to rather large buffer
 		this.msgTtl = Message.INFINITE_TTL;
 		this.applications = new HashMap<String, Collection<Application>>();
-
+		// todo add reading of settings
 		if (s.contains(B_SIZE_S)) {
 			this.bufferSize = s.getLong(B_SIZE_S);
 		}
 
+		if (s.contains(BUCKET_POLICY_S)) {
+			String bucketPolicyClass = s.getSetting(BUCKET_POLICY_S);
+			this.bucketPolicy = (BucketAssignmentPolicy) s.createIntializedObject("buffermanagement." + bucketPolicyClass);
+		}
+		else {
+			this.bucketPolicy = new buffermanagement.DefaultBucketAssignmentPolicy(s);
+		}
+		this.CountBuckets = this.bucketPolicy.getBucketCount();
+		//todo currently equal distribution of bucket space -> make generic
+		// initializes buffer size by bucket
+		// if Integer Max value it simulates "infinite Buffer"
+		long sizeByBucket = Integer.MAX_VALUE;
+		if(bufferSize != Integer.MAX_VALUE){
+		sizeByBucket = (long) (this.bufferSize / this.CountBuckets);
+		}
+
+		this.bufferSizeByBucket = new HashMap<Integer, Long>();
+		for(int i=0; i < this.CountBuckets; i++){
+			this.bufferSizeByBucket.put(i, sizeByBucket);
+		}
 		if (s.contains(MSG_TTL_S)) {
 			this.msgTtl = s.getInt(MSG_TTL_S);
 			
@@ -162,12 +200,19 @@ public abstract class MessageRouter {
 	 */
 	public void init(DTNHost host, List<MessageListener> mListeners) {
 		this.incomingMessages = new HashMap<String, Message>();
-		this.messages = new HashMap<String, Message>();
+		this.messages = new HashMap<Integer, HashMap<String, Message>>();
+		for(int i=0; i < this.CountBuckets; i++){
+			messages.put(i, new HashMap<String, Message>());
+		}
 		this.deliveredMessages = new HashMap<String, Message>();
 		this.blacklistedMessages = new HashMap<String, Object>();
 		this.mListeners = mListeners;
 		this.host = host;
 		this.bufferOccupancy = 0;
+		this.bufferOccupancyByBucket = new HashMap<Integer,Long>();
+		for(int i=0; i < this.CountBuckets; i++){
+			this.bufferOccupancyByBucket.put(i, (long) 0);
+		}
 	}
 
 	/**
@@ -176,9 +221,11 @@ public abstract class MessageRouter {
 	 */
 	protected MessageRouter(MessageRouter r) {
 		this.bufferSize = r.bufferSize;
+		this.bufferSizeByBucket = r.bufferSizeByBucket;
 		this.msgTtl = r.msgTtl;
 		this.sendQueueMode = r.sendQueueMode;
-
+		this.bucketPolicy = r.bucketPolicy;
+		this.CountBuckets = r.CountBuckets;
 		this.applications = new HashMap<String, Collection<Application>>();
 		for (Collection<Application> apps : r.applications.values()) {
 			for (Application app : apps) {
@@ -207,12 +254,40 @@ public abstract class MessageRouter {
 	public abstract void changedConnection(Connection con);
 
 	/**
+	 * Finds the Bucket, where a certain Message is present
+	 * @param m Message
+	 * @return Bucket Index
+	 */
+	public Integer findBucketByMessage(Message m){
+		return findBucketByID(m.getId());
+	}
+
+	/**
+	 * Finds the Bucket, where a certain Message ID is present
+	 * @param id ID of the Message
+	 * @return Bucket Index
+	 */
+	public Integer findBucketByID(String id){
+		for(int i = 0; i < this.CountBuckets; i++){
+			if(this.messages.get(i).containsKey(id)){
+				return i;
+			}
+		}
+		return null;
+	}
+	/**
 	 * Returns a message by ID.
 	 * @param id ID of the message
 	 * @return The message
 	 */
 	protected Message getMessage(String id) {
-		return this.messages.get(id);
+		Integer bucketIndex = findBucketByID(id);
+		if(bucketIndex == null){
+			return null;
+		}
+		else{
+			return this.messages.get(bucketIndex).get(id);
+		}
 	}
 
 	/**
@@ -221,7 +296,12 @@ public abstract class MessageRouter {
 	 * @return True if the router has message with this id, false if not
 	 */
 	public boolean hasMessage(String id) {
-		return this.messages.containsKey(id);
+		if(findBucketByID(id) == null){
+			return false;
+		}
+		else{
+			return true;
+		}
 	}
 
 	/**
@@ -257,8 +337,19 @@ public abstract class MessageRouter {
 	 * exceptions.
 	 * @return a reference to the messages of this router in collection
 	 */
-	public Collection<Message> getMessageCollection() {
-		return this.messages.values();
+	public Collection<Message> getMessageCollection(int bucket) {
+		ArrayList<Message> returnValues = new ArrayList<Message>();
+		if(bucket < -1 || bucket >= this.CountBuckets){
+			throw new SimError("Unexpected Bucket Index");
+		}
+		if(bucket==-1){
+		for(int i = 0; i < this.CountBuckets; i++){
+			returnValues.addAll(this.messages.get(i).values());
+		}}
+		else{
+			returnValues.addAll(this.messages.get(bucket).values());
+		}
+		return returnValues;
 	}
 
 	/**
@@ -276,7 +367,23 @@ public abstract class MessageRouter {
 	public long getBufferSize() {
 		return this.bufferSize;
 	}
+	/**
+	 * Returns the size of a bucket of the message buffer
+	 * @param bucket bucket index
+	 * @return The size of the bucket
+	 */
+	public long getBufferSizeBucket(int bucket){
+		return this.bufferSizeByBucket.get(bucket);
+	}
 
+
+	public long getFreeBufferSizeBucket(int bucket){
+		if (this.getBufferSizeBucket(bucket) == Integer.MAX_VALUE) {
+			return Integer.MAX_VALUE;
+		}
+
+		return this.getBufferSizeBucket(bucket) - this.bufferOccupancyByBucket.get(bucket);
+	}
 	/**
 	 * Returns the amount of free space in the buffer. May return a negative
 	 * value if there are more messages in the buffer than should fit there
@@ -451,7 +558,9 @@ public abstract class MessageRouter {
 	 * message, if false, nothing is informed.
 	 */
 	protected void addToMessages(Message m, boolean newMessage) {
-		this.messages.put(m.getId(), m);
+		int messageBucket = (int) m.getProperty(BUCKET_ID);
+		this.messages.get(messageBucket).put(m.getId(), m);
+		this.bufferOccupancyByBucket.put(messageBucket, this.bufferOccupancyByBucket.get(messageBucket) + m.getSize()) ;
 		this.bufferOccupancy += m.getSize();
 
 		if (newMessage) {
@@ -467,8 +576,10 @@ public abstract class MessageRouter {
 	 * @return The removed message or null if message for the ID wasn't found
 	 */
 	protected Message removeFromMessages(String id) {
-		Message m = this.messages.remove(id);
+		int messageBucket = findBucketByID(id);
+		Message m = this.messages.get(messageBucket).remove(id);
 		this.bufferOccupancy -= m.getSize();
+		this.bufferOccupancyByBucket.put(messageBucket, this.bufferOccupancyByBucket.get(messageBucket) - m.getSize()) ;
 		return m;
 	}
 
@@ -498,7 +609,9 @@ public abstract class MessageRouter {
 	 * @return True if the creation succeeded, false if not (e.g.
 	 * the message was too big for the buffer)
 	 */
-	public boolean createNewMessage(Message m) {
+	public boolean createNewMessage(Message m, Boolean determinedBucket) {
+		if(!determinedBucket){
+		determineBucket(m,false);}
 		m.setTtl(this.msgTtl);
 		addToMessages(m, true);
 		return true;
@@ -686,5 +799,25 @@ public abstract class MessageRouter {
 		return getClass().getSimpleName() + " of " +
 			this.getHost().toString() + " with " + getNrofMessages()
 			+ " messages";
+	}
+
+	/**
+	 * Function to determine the Bucket for this Message
+	 * @param m incomign Message
+	 */
+	public void determineBucket(Message m, Boolean receivedMessage){
+		int determinedBucket = this.bucketPolicy.assignBucket(m,this.getHost(),receivedMessage);
+		if(m.getProperty(BUCKET_ID) == null)
+		{
+			m.addProperty(BUCKET_ID, determinedBucket);
+		}
+		else{
+			m.updateProperty(BUCKET_ID, determinedBucket);
+		}
+		
+	}
+
+	public int getCountBuckets(){
+		return this.CountBuckets;
 	}
 }

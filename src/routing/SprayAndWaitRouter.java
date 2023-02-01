@@ -76,8 +76,11 @@ public class SprayAndWaitRouter extends ActiveRouter {
 	}
 
 	@Override
-	public boolean createNewMessage(Message msg) {
-		makeRoomForNewMessage(msg.getSize());
+	public boolean createNewMessage(Message msg, Boolean determinedBucket) {
+		if(!determinedBucket){
+			determineBucket(msg,false);
+		}
+		makeRoomForNewMessage((int)msg.getProperty(BUCKET_ID),msg.getSize());
 
 		msg.setTtl(this.msgTtl);
 		msg.addProperty(MSG_COUNT_PROPERTY, new Integer(initialNrofCopies));
@@ -115,7 +118,7 @@ public class SprayAndWaitRouter extends ActiveRouter {
 	protected List<Message> getMessagesWithCopiesLeft() {
 		List<Message> list = new ArrayList<Message>();
 
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(-1)) {
 			Integer nrofCopies = (Integer)m.getProperty(MSG_COUNT_PROPERTY);
 			assert nrofCopies != null : "SnW message " + m + " didn't have " +
 				"nrof copies property!";

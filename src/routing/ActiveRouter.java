@@ -44,6 +44,8 @@ public abstract class ActiveRouter extends MessageRouter {
 
 	/** prefix of all response message IDs */
 	public static final String RESPONSE_PREFIX = "R_";
+
+	
 	/** how often TTL check (discarding old messages) is performed */
 	public static int TTL_CHECK_INTERVAL = 60;
 	/** connection(s) that are currently used for sending */
@@ -126,13 +128,27 @@ public abstract class ActiveRouter extends MessageRouter {
 	}
 
 	@Override
-	public boolean createNewMessage(Message m) {
-		makeRoomForNewMessage(m.getSize());
-		return super.createNewMessage(m);
+	public boolean createNewMessage(Message m,Boolean determinedBucket) {
+		if(!determinedBucket){
+		determineBucket(m,false);}
+		makeRoomForNewMessage((int) m.getProperty(BUCKET_ID), m.getSize());
+		return super.createNewMessage(m, true);
+	}
+
+	/**
+	 * Function to determine the Bucket for this Message
+	 * @param m incomign Message
+	 */
+	public void determineBucket(Message m, Boolean receivedMessage){
+		super.determineBucket(m,receivedMessage);
 	}
 
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
+		determineBucket(m,true);
+		if((int)m.getProperty(BUCKET_ID) == -1){
+			return DENIED_UNSPECIFIED;
+		}
 		int recvCheck = checkReceiving(m, from);
 		if (recvCheck != RCV_OK) {
 			return recvCheck;
@@ -156,7 +172,7 @@ public abstract class ActiveRouter extends MessageRouter {
 			// generate a response message
 			Message res = new Message(this.getHost(),m.getFrom(),
 					RESPONSE_PREFIX+m.getId(), m.getResponseSize());
-			this.createNewMessage(res);
+			this.createNewMessage(res, false);
 			this.getMessage(RESPONSE_PREFIX+m.getId()).setRequest(m);
 		}
 
@@ -256,7 +272,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		}
 
 		/* remove oldest messages but not the ones being sent */
-		if (!makeRoomForMessage(m.getSize())) {
+		if (!makeRoomForMessage((int) m.getProperty(BUCKET_ID),m.getSize())) {
 			return DENIED_NO_SPACE; // couldn't fit into buffer -> reject
 		}
 
@@ -270,7 +286,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * transferred, the transfer is aborted before message is removed
 	 * @return True if enough space could be freed, false if not
 	 */
-	protected boolean makeRoomForMessage(int size){
+	protected boolean makeRoomForMessage(int bucket, int size){
 		if (size > this.getBufferSize()) {
 			return false; // message too big for the buffer
 		}
@@ -278,7 +294,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		long freeBuffer = this.getFreeBufferSize();
 		/* delete messages from the buffer until there's enough space */
 		while (freeBuffer < size) {
-			Message m = getNextMessageToRemove(true); // don't remove msgs being sent
+			Message m = getNextMessageToRemove(bucket,true); // don't remove msgs being sent
 
 			if (m == null) {
 				return false; // couldn't remove any more messages
@@ -296,7 +312,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * Drops messages whose TTL is less than zero.
 	 */
 	protected void dropExpiredMessages() {
-		Message[] messages = getMessageCollection().toArray(new Message[0]);
+		Message[] messages = getMessageCollection(-1).toArray(new Message[0]);
 		for (int i=0; i<messages.length; i++) {
 			int ttl = messages[i].getTtl();
 			if (ttl <= 0) {
@@ -312,8 +328,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * cleared from messages that are not being sent.
 	 * @param size Size of the new message
 	 */
-	protected void makeRoomForNewMessage(int size) {
-		makeRoomForMessage(size);
+	protected void makeRoomForNewMessage(int bucket, int size) {
+		makeRoomForMessage(bucket, size);
 	}
 
 	@Override
@@ -354,8 +370,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * (no messages in buffer or all messages in buffer are being sent and
 	 * exludeMsgBeingSent is true)
 	 */
-	protected Message getNextMessageToRemove(boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection();
+	protected Message getNextMessageToRemove(int bucket, boolean excludeMsgBeingSent) {
+		Collection<Message> messages = this.getMessageCollection(bucket);
 		Message oldest = null;
 		for (Message m : messages) {
 
@@ -384,10 +400,10 @@ public abstract class ActiveRouter extends MessageRouter {
 			/* no messages -> empty list */
 			return new ArrayList<Tuple<Message, Connection>>(0);
 		}
-
+//TODO hier vllt priority einbauen?
 		List<Tuple<Message, Connection>> forTuples =
 			new ArrayList<Tuple<Message, Connection>>();
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(-1)) {
 			for (Connection con : getConnections()) {
 				DTNHost to = con.getOtherNode(getHost());
 				if (m.getTo() == to) {
@@ -398,10 +414,10 @@ public abstract class ActiveRouter extends MessageRouter {
 
 		return forTuples;
 	}
-
+//TODO hier vllt priority einbauen?
 	protected List<Message> getDeliverableMessagesFor(DTNHost to) {
 		List<Message> deliverableMessages = new ArrayList<>();
-		for (Message m : getMessageCollection()) {
+		for (Message m : getMessageCollection(-1)) {
 			if (m.getTo() == to) {
 				deliverableMessages.add(m);
 			}
@@ -511,7 +527,8 @@ public abstract class ActiveRouter extends MessageRouter {
 
 		for (Connection con : connections) {
 			List<Message> messages =
-					new ArrayList<Message>(this.getMessageCollection());
+					new ArrayList<Message>(this.getMessageCollection(-1));
+			// TODO hier priority einbauen
 			this.sortByQueueMode(messages);
 			transferQueues.put(con, messages);
 			if (tryAllMessages(con, messages) != null) {
@@ -681,10 +698,13 @@ public abstract class ActiveRouter extends MessageRouter {
 			}
 
 			if (removeCurrent) {
-				// if the message being sent was holding excess buffer, free it
-				if (this.getFreeBufferSize() < 0) {
-					this.makeRoomForMessage(0);
+				for(int x = 0; x < getCountBuckets(); x++){
+					if (this.getFreeBufferSizeBucket(x) < 0) {
+						this.makeRoomForMessage(x,0);
+					}
 				}
+				// if the message being sent was holding excess buffer, free it
+
 				sendingConnections.remove(i);
 			}
 			else {

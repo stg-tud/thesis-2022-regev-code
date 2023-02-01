@@ -223,8 +223,8 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * Returns the messages in a collection.
 	 * @return Messages in a collection
 	 */
-	public Collection<Message> getMessageCollection() {
-		return this.router.getMessageCollection();
+	public Collection<Message> getMessageCollection(int bucket) {
+		return this.router.getMessageCollection(bucket);
 	}
 
 	/**
@@ -497,7 +497,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * @param m The message to create
 	 */
 	public void createNewMessage(Message m) {
-		this.router.createNewMessage(m);
+		this.router.createNewMessage(m ,false);
 	}
 
 	/**

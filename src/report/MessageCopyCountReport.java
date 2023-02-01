@@ -30,7 +30,7 @@ public class MessageCopyCountReport extends MessageLocationReport {
 		ArrayList<String> keys;
 
 		for (DTNHost host : hosts) {
-			for (Message m : host.getMessageCollection()) {
+			for (Message m : host.getMessageCollection(-1)) {
 				Integer oldCount;
 				if (!isTracked(m)) {
 					continue;
