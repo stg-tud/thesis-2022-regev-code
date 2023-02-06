@@ -27,7 +27,8 @@ import core.MessageListener;
 import core.NetworkInterface;
 import core.Settings;
 import core.SimClock;
-
+import droppolicy.defaultDropPolicy;
+import droppolicy.dropPolicy;
 /**
  * Superclass of active routers. Contains convenience methods (e.g.
  * {@link #getNextMessageToRemove(boolean)}) and watching of sending connections (see
@@ -59,6 +60,8 @@ public abstract class ActiveRouter extends MessageRouter {
 	private Map<Connection, List<Message>> transferQueues;
 	private Map<DTNHost, List<Message>> deliveryQueue;
 
+	public static final String DROP_POLICY_S = "dropPolicy";
+	public dropPolicy dropMode;
 	/**
 	 * Constructor. Creates a new message router based on the settings in
 	 * the given Settings object.
@@ -76,6 +79,14 @@ public abstract class ActiveRouter extends MessageRouter {
 		} else {
 			this.energy = null; /* no energy model */
 		}
+
+		if (s.contains(DROP_POLICY_S)) {
+			String dropPolicyClass = s.getSetting(DROP_POLICY_S);
+			this.dropMode = (dropPolicy) s.createIntializedObject("droppolicy." + dropPolicyClass);
+		}
+		else {
+			this.dropMode = new defaultDropPolicy(s);
+		}
 	}
 
 	/**
@@ -87,6 +98,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		this.deleteDelivered = r.deleteDelivered;
 		this.policy = r.policy;
 		this.energy = (r.energy != null ? r.energy.replicate() : null);
+		this.dropMode = r.dropMode;
 	}
 
 	@Override
@@ -371,23 +383,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * exludeMsgBeingSent is true)
 	 */
 	protected Message getNextMessageToRemove(int bucket, boolean excludeMsgBeingSent) {
-		Collection<Message> messages = this.getMessageCollection(bucket);
-		Message oldest = null;
-		for (Message m : messages) {
-
-			if (excludeMsgBeingSent && isSending(m.getId())) {
-				continue; // skip the message(s) that router is sending
-			}
-
-			if (oldest == null ) {
-				oldest = m;
-			}
-			else if (oldest.getReceiveTime() > m.getReceiveTime()) {
-				oldest = m;
-			}
-		}
-
-		return oldest;
+		return this.dropMode.determineNextMessageToRemove(this,bucket,excludeMsgBeingSent);
 	}
 
 	/**
