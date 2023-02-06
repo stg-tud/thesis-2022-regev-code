@@ -22,8 +22,10 @@ import core.SettingsError;
 import core.SimClock;
 import core.SimError;
 import routing.util.RoutingInfo;
+import sendingpolicy.sendPolicy;
 import util.Tuple;
 import buffermanagement.BucketAssignmentPolicy;
+import sendingpolicy.sendPolicy;
 
 /**
  * Superclass for message routers.
@@ -48,16 +50,6 @@ public abstract class MessageRouter {
 	 * </UL>
 	 */
 	public static final String SEND_QUEUE_MODE_S = "sendQueue";
-
-	/** Setting value for random queue mode */
-	public static final int Q_MODE_RANDOM = 1;
-	/** Setting value for FIFO queue mode */
-	public static final int Q_MODE_FIFO = 2;
-
-	/** Setting string for random queue mode */
-	public static final String STR_Q_MODE_RANDOM = "RANDOM";
-	/** Setting string for FIFO queue mode */
-	public static final String STR_Q_MODE_FIFO = "FIFO";
 
 	/**
 	 * Bucket Identifier for message Property
@@ -115,7 +107,7 @@ public abstract class MessageRouter {
 	/** TTL for all messages */
 	protected int msgTtl;
 	/** Queue mode for sending messages */
-	private int sendQueueMode;
+	private sendPolicy sendQueueMode;
 
 	/** Setting String for BucketAssignmentPolicy */
 	public static final String BUCKET_POLICY_S = "BucketPolicy";
@@ -171,23 +163,11 @@ public abstract class MessageRouter {
 		}
 
 		if (s.contains(SEND_QUEUE_MODE_S)) {
-
-			String mode = s.getSetting(SEND_QUEUE_MODE_S);
-
-			if (mode.trim().toUpperCase().equals(STR_Q_MODE_FIFO)) {
-				this.sendQueueMode = Q_MODE_FIFO;
-			} else if (mode.trim().toUpperCase().equals(STR_Q_MODE_RANDOM)){
-				this.sendQueueMode = Q_MODE_RANDOM;
-			} else {
-				this.sendQueueMode = s.getInt(SEND_QUEUE_MODE_S);
-				if (sendQueueMode < 1 || sendQueueMode > 2) {
-					throw new SettingsError("Invalid value for " +
-							s.getFullPropertyName(SEND_QUEUE_MODE_S));
-				}
-			}
+			String sendPolicyClass = s.getSetting(SEND_QUEUE_MODE_S);
+			this.sendQueueMode = (sendPolicy) s.createIntializedObject("sendingpolicy." + sendPolicyClass);
 		}
 		else {
-			sendQueueMode = Q_MODE_RANDOM;
+			sendQueueMode = new sendingpolicy.RandomsendPolicy(s);
 		}
 	}
 
@@ -349,6 +329,7 @@ public abstract class MessageRouter {
 		else{
 			returnValues.addAll(this.messages.get(bucket).values());
 		}
+		
 		return returnValues;
 	}
 
@@ -408,6 +389,7 @@ public abstract class MessageRouter {
 	}
 
 	/**
+	 * [RR: Seems to be deprecated]
 	 * Start sending a message to another host.
 	 * @param id Id of the message to send
 	 * @param to The host to send the message to
@@ -644,45 +626,7 @@ public abstract class MessageRouter {
 	 */
 	@SuppressWarnings(value = "unchecked") /* ugly way to make this generic */
 	protected List sortByQueueMode(List list) {
-		switch (sendQueueMode) {
-		case Q_MODE_RANDOM:
-			Collections.shuffle(list, new Random(SimClock.getIntTime()));
-			break;
-		case Q_MODE_FIFO:
-			Collections.sort(list,
-					new Comparator() {
-				/** Compares two tuples by their messages' receiving time */
-				public int compare(Object o1, Object o2) {
-					double diff;
-					Message m1, m2;
-
-					if (o1 instanceof Tuple) {
-						m1 = ((Tuple<Message, Connection>)o1).getKey();
-						m2 = ((Tuple<Message, Connection>)o2).getKey();
-					}
-					else if (o1 instanceof Message) {
-						m1 = (Message)o1;
-						m2 = (Message)o2;
-					}
-					else {
-						throw new SimError("Invalid type of objects in " +
-								"the list");
-					}
-
-					diff = m1.getReceiveTime() - m2.getReceiveTime();
-					if (diff == 0) {
-						return 0;
-					}
-					return (diff < 0 ? -1 : 1);
-				}
-			});
-			break;
-		/* add more queue modes here */
-		default:
-			throw new SimError("Unknown queue mode " + sendQueueMode);
-		}
-
-		return list;
+		return this.sendQueueMode.sortMessageListByPolicy(list);
 	}
 
 	/**
@@ -694,24 +638,7 @@ public abstract class MessageRouter {
 	 *          message should come first, or 0 if the ordering isn't defined
 	 */
 	protected int compareByQueueMode(Message m1, Message m2) {
-		switch (sendQueueMode) {
-		case Q_MODE_RANDOM:
-			/* return randomly (enough) but consistently -1, 0 or 1 */
-			int hash_diff = m1.hashCode() - m2.hashCode();
-			if (hash_diff == 0) {
-				return 0;
-			}
-			return (hash_diff < 0 ? -1 : 1);
-		case Q_MODE_FIFO:
-			double diff = m1.getReceiveTime() - m2.getReceiveTime();
-			if (diff == 0) {
-				return 0;
-			}
-			return (diff < 0 ? -1 : 1);
-		/* add more queue modes here */
-		default:
-			throw new SimError("Unknown queue mode " + sendQueueMode);
-		}
+		return this.sendQueueMode.compareMessagesByPolicy(m1, m2);
 	}
 
 	/**
