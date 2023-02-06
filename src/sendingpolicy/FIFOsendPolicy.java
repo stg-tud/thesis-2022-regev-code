@@ -15,7 +15,6 @@ public class FIFOsendPolicy extends sendPolicy {
 
     public FIFOsendPolicy(Settings s) {
         super(s);
-        //TODO Auto-generated constructor stub
     }
 
     @Override

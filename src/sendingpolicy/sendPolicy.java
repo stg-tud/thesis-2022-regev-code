@@ -9,13 +9,30 @@ import core.Settings;
 public abstract class sendPolicy {
     public sendPolicy(Settings s){
     }
-
-    public abstract HashMap<Integer, HashMap<String, Message>> sortQueueByPolicy(HashMap<Integer, HashMap<String, Message>> messages);
-    
-    public abstract List<Message>  sortMessageListByPolicy(List<Message> MessageBuffer);
-
-    public abstract HashMap<String, Message>  sortBucketByPolicy(HashMap<String, Message> MessageBuffer);
-
+/**
+ * receives a whole Buffer and sorts it according to the policy
+ * @param messageBuffer message Buffer
+ * @return sorted message Buffer
+ */
+    public abstract HashMap<Integer, HashMap<String, Message>> sortQueueByPolicy(HashMap<Integer, HashMap<String, Message>> messageBuffer);
+/**
+ * Receives List of Messages and sorts it according to the policy
+ * @param messageList message List
+ * @return sorted message List
+ */  
+    public abstract List<Message>  sortMessageListByPolicy(List<Message> messageList);
+/**
+ * Receives a single Bucket of the Buffer and sorts it according to the policy
+ * @param MessageBucket Message Bucket
+ * @return sorted Message Bucket
+ */
+    public abstract HashMap<String, Message>  sortBucketByPolicy(HashMap<String, Message> MessageBucket);
+/**
+ * Receives two messages and compares them. Returns int which indicates the order, according to the policy
+ * @param m1 Message 1
+ * @param m2 Message 2
+ * @return Integer which indicates the order
+ */
     public abstract int compareMessagesByPolicy(Message m1, Message m2);
 }
 
