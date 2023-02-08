@@ -3,8 +3,12 @@ package sendingpolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import core.Connection;
 import core.Message;
 import core.Settings;
 import core.SimClock;
@@ -49,6 +53,15 @@ public class RandomsendPolicy extends sendPolicy {
 				return 0;
 			}
 			return (hash_diff < 0 ? -1 : 1);
+    }
+
+    @Override
+    public HashSet<Connection> sortConnectionByPriority(HashSet<Connection> connections) {
+        /*ArrayList<Connection> connectionList = (ArrayList<Connection>)connections.stream().collect(Collectors.toList());
+        Collections.shuffle(connectionList, new Random(SimClock.getIntTime()));
+        return new HashSet<Connection>(connectionList);
+        */
+        return connections;
     }
     
 }
