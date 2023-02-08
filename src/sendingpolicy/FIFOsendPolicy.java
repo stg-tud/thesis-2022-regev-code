@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import util.Tuple;
 import core.Connection;
@@ -77,6 +78,11 @@ public class FIFOsendPolicy extends sendPolicy {
 				return 0;
 			}
 			return (diff < 0 ? -1 : 1);
+    }
+
+    @Override
+    public HashSet<Connection> sortConnectionByPriority(HashSet<Connection> connections) {
+        return connections;
     }
     
 }

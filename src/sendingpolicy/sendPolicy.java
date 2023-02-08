@@ -1,7 +1,9 @@
 package sendingpolicy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
+import core.Connection;
 import core.Message;
 import core.Settings;
 
@@ -34,5 +36,12 @@ public abstract class sendPolicy {
  * @return Integer which indicates the order
  */
     public abstract int compareMessagesByPolicy(Message m1, Message m2);
+
+/**
+ * Receives a Hashset of connections and sorts them according to the policy
+ * @param connections hashset of connections
+ * @return sorted hashset of connections
+ */
+    public abstract HashSet<Connection> sortConnectionByPriority(HashSet<Connection> connections);
 }
 

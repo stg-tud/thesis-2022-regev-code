@@ -102,7 +102,7 @@ public abstract class MessageRouter {
 	/** TTL for all messages */
 	protected int msgTtl;
 	/** Queue mode for sending messages */
-	private sendPolicy sendQueueMode;
+	protected sendPolicy sendQueueMode;
 
 	/** Setting String for BucketAssignmentPolicy */
 	public static final String BUCKET_POLICY_S = "BucketPolicy";
@@ -162,7 +162,7 @@ public abstract class MessageRouter {
 			this.sendQueueMode = (sendPolicy) s.createIntializedObject("sendingpolicy." + sendPolicyClass);
 		}
 		else {
-			sendQueueMode = new sendingpolicy.RandomsendPolicy(s);
+			sendQueueMode = new sendingpolicy.DefaultsendPolicy(s);
 		}
 	}
 
