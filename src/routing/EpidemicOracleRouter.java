@@ -60,6 +60,7 @@ public class EpidemicOracleRouter extends ActiveRouter {
 					newMessages.add(m);
 				}
 			}
+			newMessages = super.sendQueueMode.sortMessageListByPolicy(newMessages);
 			for (Message m : newMessages) {
 				/* try to start transfer from peer */
 				if (con.startTransfer(peer, m) == RCV_OK) {
