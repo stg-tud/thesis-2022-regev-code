@@ -162,7 +162,7 @@ public abstract class MessageRouter {
 			this.sendQueueMode = (sendPolicy) s.createIntializedObject("sendingpolicy." + sendPolicyClass);
 		}
 		else {
-			sendQueueMode = new sendingpolicy.RandomsendPolicy(s);
+			sendQueueMode = new sendingpolicy.DefaultsendPolicy(s);
 		}
 	}
 
