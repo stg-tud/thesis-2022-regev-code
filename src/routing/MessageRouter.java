@@ -45,7 +45,7 @@ public abstract class MessageRouter {
 	 * <LI/> 2 : FIFO (most recently received messages are sent last)
 	 * </UL>
 	 */
-	public static final String SEND_QUEUE_MODE_S = "sendQueue";
+	public static final String SEND_QUEUE_MODE_S = "SendingPolicy";
 
 	/**
 	 * Bucket Identifier for message Property
