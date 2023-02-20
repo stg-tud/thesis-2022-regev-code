@@ -1,0 +1,4 @@
+Scenario.name = Epidemic
+Group.router = EpidemicRouter
+Group.BucketPolicy = roundRobinBucketPolicy
+Group.SendingPolicy = FIFOsendPolicy
