@@ -7,6 +7,7 @@ package routing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import core.Application;
@@ -80,9 +81,9 @@ public abstract class MessageRouter {
 
 	private List<MessageListener> mListeners;
 	/** The messages being transferred with msgID_hostName keys */
-	private HashMap<String, Message> incomingMessages;
+	private LinkedHashMap<String, Message> incomingMessages;
 	/** The messages this router is carrying */
-	private HashMap<Integer, HashMap<String, Message>> messages;
+	private LinkedHashMap<Integer, LinkedHashMap<String, Message>> messages;
 	/** The messages this router has received as the final recipient */
 	private HashMap<String, Message> deliveredMessages;
 	/** The messages that Applications on this router have blacklisted */
@@ -92,11 +93,11 @@ public abstract class MessageRouter {
 	/** size of the buffer */
 	private long bufferSize;
 	/** Size of the buffer by Bucket */
-	private HashMap<Integer,Long> bufferSizeByBucket;
+	private LinkedHashMap<Integer,Long> bufferSizeByBucket;
 	/** current occupancy of the buffer */
 	private long bufferOccupancy;
 	//* current occupancy of the buffer by Bucket*/
-	private HashMap<Integer,Long> bufferOccupancyByBucket;
+	private LinkedHashMap<Integer,Long> bufferOccupancyByBucket;
 	/** Count of Buckets */
 	private int CountBuckets;
 	/** TTL for all messages */
@@ -110,7 +111,7 @@ public abstract class MessageRouter {
 	public BucketAssignmentPolicy bucketPolicy;
 
 	/** applications attached to the host */
-	private HashMap<String, Collection<Application>> applications = null;
+	private LinkedHashMap<String, Collection<Application>> applications = null;
 
 	/**
 	 * Constructor. Creates a new message router based on the settings in
@@ -121,7 +122,7 @@ public abstract class MessageRouter {
 	public MessageRouter(Settings s) {
 		this.bufferSize = Integer.MAX_VALUE; // defaults to rather large buffer
 		this.msgTtl = Message.INFINITE_TTL;
-		this.applications = new HashMap<String, Collection<Application>>();
+		this.applications = new LinkedHashMap<String, Collection<Application>>();
 		// todo add reading of settings
 		if (s.contains(B_SIZE_S)) {
 			this.bufferSize = s.getLong(B_SIZE_S);
@@ -143,7 +144,7 @@ public abstract class MessageRouter {
 		sizeByBucket = (long) (this.bufferSize / this.CountBuckets);
 		}
 
-		this.bufferSizeByBucket = new HashMap<Integer, Long>();
+		this.bufferSizeByBucket = new LinkedHashMap<Integer, Long>();
 		for(int i=0; i < this.CountBuckets; i++){
 			this.bufferSizeByBucket.put(i, sizeByBucket);
 		}
@@ -174,17 +175,17 @@ public abstract class MessageRouter {
 	 * @param mListeners The message listeners
 	 */
 	public void init(DTNHost host, List<MessageListener> mListeners) {
-		this.incomingMessages = new HashMap<String, Message>();
-		this.messages = new HashMap<Integer, HashMap<String, Message>>();
+		this.incomingMessages = new LinkedHashMap<String, Message>();
+		this.messages = new LinkedHashMap<Integer, LinkedHashMap<String, Message>>();
 		for(int i=0; i < this.CountBuckets; i++){
-			messages.put(i, new HashMap<String, Message>());
+			messages.put(i, new LinkedHashMap<String, Message>());
 		}
 		this.deliveredMessages = new HashMap<String, Message>();
 		this.blacklistedMessages = new HashMap<String, Object>();
 		this.mListeners = mListeners;
 		this.host = host;
 		this.bufferOccupancy = 0;
-		this.bufferOccupancyByBucket = new HashMap<Integer,Long>();
+		this.bufferOccupancyByBucket = new LinkedHashMap<Integer,Long>();
 		for(int i=0; i < this.CountBuckets; i++){
 			this.bufferOccupancyByBucket.put(i, (long) 0);
 		}
@@ -201,7 +202,7 @@ public abstract class MessageRouter {
 		this.sendQueueMode = r.sendQueueMode;
 		this.bucketPolicy = r.bucketPolicy;
 		this.CountBuckets = r.CountBuckets;
-		this.applications = new HashMap<String, Collection<Application>>();
+		this.applications = new LinkedHashMap<String, Collection<Application>>();
 		for (Collection<Application> apps : r.applications.values()) {
 			for (Application app : apps) {
 				addApplication(app.replicate());
@@ -333,7 +334,11 @@ public abstract class MessageRouter {
 	 * @return How many messages this router has
 	 */
 	public int getNrofMessages() {
-		return this.messages.size();
+		int nrOfMessages = 0;
+		for(int i = 0; i < this.CountBuckets; i++){
+			nrOfMessages += this.messages.get(i).size();
+		}
+		return nrOfMessages;
 	}
 
 	/**

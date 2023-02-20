@@ -9,11 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -108,8 +106,8 @@ public abstract class ActiveRouter extends MessageRouter {
 		super.init(host, mListeners);
 		this.sendingConnections = new ArrayList<Connection>(1);
 		this.lastTtlCheck = 0;
-		this.transferQueues = new HashMap<>();
-		this.deliveryQueue = new HashMap<>();
+		this.transferQueues = new LinkedHashMap<>();
+		this.deliveryQueue = new LinkedHashMap<>();
 	}
 
 	/**
@@ -487,7 +485,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 */
 	protected Connection tryMessagesToConnections(List<Message> messages,
 			Collection<Connection> connections) {
-		HashSet<Connection> conns = super.sendQueueMode.sortConnectionByPriority(new LinkedHashSet<Connection>(connections));
+		LinkedHashSet<Connection> conns = super.sendQueueMode.sortConnectionByPriority(new LinkedHashSet<Connection>(connections));
 		List<Connection> connectionList = (List<Connection>)conns.stream().collect(Collectors.toList());
 		for (Connection con : connectionList) {
 			if (tryAllMessages(con, messages) != null) {
@@ -506,7 +504,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * accepted a message.
 	 */
 	protected Connection tryAllMessagesToAllConnections(){
-		Set<Connection> connections = super.sendQueueMode.sortConnectionByPriority(new HashSet<>(getConnections()));
+		LinkedHashSet<Connection> connections = super.sendQueueMode.sortConnectionByPriority(new LinkedHashSet<>(getConnections()));
 		if (connections.size() == 0 || this.getNrofMessages() == 0) {
 			return null;
 		}
@@ -548,7 +546,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	 * was started
 	 */
 	protected Connection exchangeDeliverableMessages() {
-		Set<Connection> connections = super.sendQueueMode.sortConnectionByPriority(new HashSet<>(getConnections()));
+		LinkedHashSet<Connection> connections = super.sendQueueMode.sortConnectionByPriority(new LinkedHashSet<>(getConnections()));
 
 		if (connections.size() == 0) {
 			return null;

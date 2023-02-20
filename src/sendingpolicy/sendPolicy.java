@@ -1,6 +1,6 @@
 package sendingpolicy;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import core.Connection;
@@ -16,7 +16,7 @@ public abstract class sendPolicy {
  * @param messageBuffer message Buffer
  * @return sorted message Buffer
  */
-    public abstract HashMap<Integer, HashMap<String, Message>> sortQueueByPolicy(HashMap<Integer, HashMap<String, Message>> messageBuffer);
+    public abstract LinkedHashMap<Integer, LinkedHashMap<String, Message>> sortQueueByPolicy(LinkedHashMap<Integer, LinkedHashMap<String, Message>> messageBuffer);
 /**
  * Receives List of Messages and sorts it according to the policy
  * @param messageList message List
@@ -28,7 +28,7 @@ public abstract class sendPolicy {
  * @param MessageBucket Message Bucket
  * @return sorted Message Bucket
  */
-    public abstract HashMap<String, Message>  sortBucketByPolicy(HashMap<String, Message> MessageBucket);
+    public abstract LinkedHashMap<String, Message>  sortBucketByPolicy(LinkedHashMap<String, Message> MessageBucket);
 /**
  * Receives two messages and compares them. Returns int which indicates the order, according to the policy
  * @param m1 Message 1
@@ -42,6 +42,6 @@ public abstract class sendPolicy {
  * @param connections hashset of connections
  * @return sorted hashset of connections
  */
-    public abstract HashSet<Connection> sortConnectionByPriority(HashSet<Connection> connections);
+    public abstract LinkedHashSet<Connection> sortConnectionByPriority(LinkedHashSet<Connection> connections);
 }
 
