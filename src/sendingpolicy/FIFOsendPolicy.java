@@ -50,7 +50,14 @@ public class FIFOsendPolicy extends sendPolicy {
 						throw new SimError("Invalid type of objects in " +
 								"the list");
 					}
-
+                    Integer b1 = (Integer)m1.getProperty("Bucket");
+                    Integer b2 = (Integer)m2.getProperty("Bucket");
+                    if(b1 != null && b2 != null){
+                        if(b1 < b2){
+                            return -1;}
+                        else if(b1 > b2){
+                            return 1;}
+                    }
 					diff = m1.getReceiveTime() - m2.getReceiveTime();
 					if (diff == 0) {
 						return 0;
@@ -73,6 +80,14 @@ public class FIFOsendPolicy extends sendPolicy {
 
     @Override
     public int compareMessagesByPolicy(Message m1, Message m2) {
+        Integer b1 = (Integer)m1.getProperty("Bucket");
+        Integer b2 = (Integer)m2.getProperty("Bucket");
+            if(b1 != null && b2 != null){
+                if(b1 < b2){
+                    return -1;}
+                else if(b1 > b2){
+                    return 1;}
+            }
         double diff = m1.getReceiveTime() - m2.getReceiveTime();
 			if (diff == 0) {
 				return 0;
