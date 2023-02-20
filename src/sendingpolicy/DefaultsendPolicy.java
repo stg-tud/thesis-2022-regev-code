@@ -2,8 +2,8 @@ package sendingpolicy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -20,8 +20,8 @@ public class DefaultsendPolicy extends sendPolicy {
     }
 
     @Override
-    public HashMap<Integer, HashMap<String, Message>> sortQueueByPolicy(
-            HashMap<Integer, HashMap<String, Message>> messages) {
+    public LinkedHashMap<Integer, LinkedHashMap<String, Message>> sortQueueByPolicy(
+        LinkedHashMap<Integer, LinkedHashMap<String, Message>> messages) {
                 for(int i = 0; i < messages.size(); i++){
                     messages.put(i, sortBucketByPolicy(messages.get(i)));
                     
@@ -36,8 +36,8 @@ public class DefaultsendPolicy extends sendPolicy {
     }
 
     @Override
-    public HashMap<String, Message> sortBucketByPolicy(HashMap<String, Message> MessageBuffer) {
-        HashMap<String, Message> ret = new HashMap<String, Message>();
+    public LinkedHashMap<String, Message> sortBucketByPolicy(LinkedHashMap<String, Message> MessageBuffer) {
+        LinkedHashMap<String, Message> ret = new LinkedHashMap<String, Message>();
         List<Message> msg = sortMessageListByPolicy(new ArrayList<Message>(MessageBuffer.values()));
         for(Message m : msg){
             ret.put(m.getId(), m);
@@ -55,7 +55,7 @@ public class DefaultsendPolicy extends sendPolicy {
     }
 
     @Override
-    public HashSet<Connection> sortConnectionByPriority(HashSet<Connection> connections) {
+    public LinkedHashSet<Connection> sortConnectionByPriority(LinkedHashSet<Connection> connections) {
         return connections;
     }
     
