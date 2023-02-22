@@ -7,6 +7,7 @@ package core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import movement.MovementModel;
@@ -548,6 +549,14 @@ public class DTNHost implements Comparable<DTNHost> {
 			}
 		}
 		return false;
+	}
+	/**
+	 * Creates a HashSet containing all the DTNHosts, from whom messages were received or sended to
+	 * Executed in the MessageRouter of the DTNHost
+	 * @return List with those DTNHosts
+	 */
+	public HashSet<DTNHost> getKnownHosts(){
+		return this.router.getKnownHosts();
 	}
 
 }
