@@ -1,0 +1,4 @@
+Scenario.name = Epidemic
+Group.router = EpidemicRouter
+Group.BucketPolicy = sourceSegregationBucketPolicy
+Group.SendingPolicy = FIFOsendPolicy
