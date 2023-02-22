@@ -5,7 +5,7 @@ import pathlib
 abspath = pathlib.Path(__file__).parent.resolve()
 bp = os.path.join(abspath,"generated_configs")
 
-list_routing_algorithms = ["EpidemicRouter"]
+list_routing_algorithms = ["EpidemicRouter","SprayAndWaitRouter"]
 list_bufferpolicies= ["destinationBasedBucketPolicy", "forwardCountBucketPolicy","friendlyHostsBucketPolicy",
 "prioritizeLowTTLBucketPolicy", "randomBucketPolicy", "roundRobinBucketPolicy", "senderBasedBucketAssignmentPolicy",
 "sizeBasedBucketsPolicy","sourceSegregationBucketPolicy"]
