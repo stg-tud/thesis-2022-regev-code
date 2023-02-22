@@ -7,6 +7,7 @@ package routing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -746,5 +747,19 @@ public abstract class MessageRouter {
 
 	public int getCountBuckets(){
 		return this.CountBuckets;
+	}
+
+	/**
+	 * Creates a HashSet containing all the DTNHosts, from whom messages were received or sended to
+	 * @return List with those DTNHosts
+	 */
+	public HashSet<DTNHost> getKnownHosts(){
+		HashSet<DTNHost> retVal = new HashSet<DTNHost>();
+		for(Message m: this.deliveredMessages.values()){
+			if(m.getFrom().equals(getHost()) == false){
+			retVal.add(m.getFrom());}
+			else{retVal.add(m.getTo());}
+		}
+		return retVal;
 	}
 }
