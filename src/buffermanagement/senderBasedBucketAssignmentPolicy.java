@@ -4,11 +4,11 @@ import core.DTNHost;
 import core.Message;
 import core.Settings;
 
-public class sourceSegregationBucketPolicy extends BucketAssignmentPolicy {
+public class senderBasedBucketAssignmentPolicy extends BucketAssignmentPolicy {
 
-    public sourceSegregationBucketPolicy(Settings s){
+    public senderBasedBucketAssignmentPolicy(Settings s) {
         super(s);
-        this.BucketCount = 2;
+        this.BucketCount = 3;
     }
 
     @Override
@@ -16,8 +16,11 @@ public class sourceSegregationBucketPolicy extends BucketAssignmentPolicy {
         if(m.getFrom().equals(currentHost)){
             return 0;
         }
-        else{
+        else if(m.getFrom().equals(m.getHops().get(0))){
             return 1;
+        }
+        else{
+            return 2;
         }
     }
     

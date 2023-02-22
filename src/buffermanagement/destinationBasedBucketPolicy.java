@@ -4,16 +4,16 @@ import core.DTNHost;
 import core.Message;
 import core.Settings;
 
-public class sourceSegregationBucketPolicy extends BucketAssignmentPolicy {
+public class destinationBasedBucketPolicy extends BucketAssignmentPolicy {
 
-    public sourceSegregationBucketPolicy(Settings s){
+    public destinationBasedBucketPolicy(Settings s) {
         super(s);
         this.BucketCount = 2;
     }
 
     @Override
     public Integer assignBucket(Message m, DTNHost currentHost, Boolean receivedMessage) {
-        if(m.getFrom().equals(currentHost)){
+        if(currentHost.hasConnection(m.getTo())){
             return 0;
         }
         else{
