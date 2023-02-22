@@ -22,3 +22,4 @@ HISTORY.txt
 /bin/
 lib/junit-platform-console-standalone-1.9.1.jar
 #/example_settings/
+/misc/generated_configs/

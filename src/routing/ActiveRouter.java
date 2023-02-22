@@ -60,7 +60,7 @@ public abstract class ActiveRouter extends MessageRouter {
 	private Map<Connection, List<Message>> transferQueues;
 	private Map<DTNHost, List<Message>> deliveryQueue;
 
-	public static final String DROP_POLICY_S = "dropPolicy";
+	public static final String DROP_POLICY_S = "DropPolicy";
 	public dropPolicy dropMode;
 	/**
 	 * Constructor. Creates a new message router based on the settings in
