@@ -538,4 +538,16 @@ public class DTNHost implements Comparable<DTNHost> {
 		return this.getAddress() - h.getAddress();
 	}
 
+	/**
+	 * Checks if this DTNHost has a direct Connection to another DTNHost
+	 */
+	public Boolean hasConnection(DTNHost destHost){
+		for(Connection c : this.allConnections){
+			if(c.toNode.equals(this)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
