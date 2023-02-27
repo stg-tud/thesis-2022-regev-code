@@ -1,0 +1,4 @@
+Scenario.name = Epidemic
+Group.router = EpidemicRouter
+Group.movementModel = ExternalMovement
+ExternalMovement.file = movement_models/exampleScenario.one
