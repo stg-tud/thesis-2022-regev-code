@@ -1,0 +1,6 @@
+Scenario.name = %%Group.router%%_%%ExternalMovement.file%%
+Group.router = [EpidemicRouter;SprayAndWaitRouter]
+SprayAndWaitRouter.nrofCopies = 10
+SprayAndWaitRouter.binaryMode = true
+Group.movementModel = ExternalMovement
+ExternalMovement.file = [movement_models/RandomWaypoint1.one;movement_models/RandomWaypoint2.one;movement_models/RandomWaypoint3.one;movement_models/RandomWaypoint4.one;movement_models/RandomWaypoint5.one]
