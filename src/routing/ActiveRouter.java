@@ -7,6 +7,7 @@ package routing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ import core.Settings;
 import core.SimClock;
 import droppolicy.defaultDropPolicy;
 import droppolicy.dropPolicy;
+import attacks.Attack;
 /**
  * Superclass of active routers. Contains convenience methods (e.g.
  * {@link #getNextMessageToRemove(boolean)}) and watching of sending connections (see
@@ -62,6 +64,10 @@ public abstract class ActiveRouter extends MessageRouter {
 
 	public static final String DROP_POLICY_S = "DropPolicy";
 	public dropPolicy dropMode;
+
+	public static final String NROF_ATTACK_S = "nrofAttacks";
+	public static final String Attack_S = "Attack";
+	public List<Attack> influencingAttacks;
 	/**
 	 * Constructor. Creates a new message router based on the settings in
 	 * the given Settings object.
@@ -87,6 +93,15 @@ public abstract class ActiveRouter extends MessageRouter {
 		else {
 			this.dropMode = new defaultDropPolicy(s);
 		}
+		this.influencingAttacks = new ArrayList<Attack>();
+
+		// read attacks from settings
+		if (s.contains(NROF_ATTACK_S)) {
+		for (int i=1, n = s.getInt(NROF_ATTACK_S); i<=n; i++){
+			String attackClass = s.getSetting(Attack_S + i);
+			this.influencingAttacks.add((Attack) s.createIntializedObject("attacks." + attackClass));
+		}
+	}
 	}
 
 	/**
@@ -99,6 +114,7 @@ public abstract class ActiveRouter extends MessageRouter {
 		this.policy = r.policy;
 		this.energy = (r.energy != null ? r.energy.replicate() : null);
 		this.dropMode = r.dropMode;
+		this.influencingAttacks = r.influencingAttacks;
 	}
 
 	@Override
@@ -217,6 +233,16 @@ public abstract class ActiveRouter extends MessageRouter {
 		if (!policy.acceptSending(getHost(),
 				con.getOtherNode(getHost()), con, m)) {
 			return MessageRouter.DENIED_POLICY;
+		}
+		
+		// Attacks on this system.
+		for(Attack influencingAttack : this.influencingAttacks){
+			switch(influencingAttack.getAttackType()){
+				case 0:
+					m = influencingAttack.attackOnMessage(m, con);
+				case 1:
+					con = influencingAttack.attackOnConnection(m, con);
+			}
 		}
 
 		retVal = con.startTransfer(getHost(), m);
