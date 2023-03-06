@@ -25,3 +25,4 @@ lib/junit-platform-console-standalone-1.9.1.jar
 /misc/generated_configs/
 reports/**
 movement_models/
+example_settings/externalMovement_Example.txt
