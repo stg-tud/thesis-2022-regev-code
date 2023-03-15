@@ -71,8 +71,10 @@ public abstract class Report {
 	private String scenarioName;
 
 	public static final String GROUP_NS = "Group";
-	public static final int MAX_GROUPIDs = 9;
+	public int MAX_GROUPIDs;
+	public static final String NR_GROUPS_S = "Scenario.nrofHostGroups";
 	public static final String defaultPolicy = "Default";
+	public LinkedHashMap<String,String> groupInfos;
 	/**
 	 * Settings Identifier for Bucket Policy
 	 */
@@ -116,16 +118,45 @@ public abstract class Report {
 				SimScenario.SCENARIO_NS + "." +	SimScenario.NAME_S));
 		settings = getSettings();
 
+		if(settings.containsNoNamespace(NR_GROUPS_S)){
+			this.MAX_GROUPIDs = Integer.parseInt(settings.getSettingNoNamespace(NR_GROUPS_S));
+		}
+		else{
+			this.MAX_GROUPIDs = 9;
+		}
+		this.groupInfos = new LinkedHashMap<String,String>();
 		this.bucketPolicy = new LinkedHashMap<String,String>();
 		this.sendingPolicy = new LinkedHashMap<String,String>();
 		this.dropPolicy = new LinkedHashMap<String,String>();
 		this.routerList = new LinkedHashMap<String,String>();
-		// Reading out of Group Router + drop, sending and bucket policies
-		for(int i=1; i <= MAX_GROUPIDs; i++){
+
+		// Reading out of Group Router and Infos + drop, sending and bucket policies
+		for(int i=0; i <= MAX_GROUPIDs; i++){
 			String ix = Integer.toString(i);
+			if(i == 0){
+				ix = "";
+			}
 			if(settings.containsNoNamespace(GROUP_NS + ix + "." + ROUTER_S)){
 				this.routerList.put(GROUP_NS + ix, settings.getSettingNoNamespace(GROUP_NS + ix + "." + ROUTER_S));
 				readPolicies(ix,settings);
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "bufferSize")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "bufferSize",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "bufferSize"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "waitTime")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "waitTime",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "waitTime"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "nrofInterfaces")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "nrofInterfaces",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "nrofInterfaces"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "speed")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "speed",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "speed"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "msgTtl")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "msgTtl",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "msgTtl"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "nrofHosts")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "nrofHosts",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "nrofHosts"));
+				}
 			}
 			else{
 				break;
@@ -390,6 +421,14 @@ public abstract class Report {
 	 */
 	protected LinkedHashMap<String,String> getEventsInfo(){
 		return this.eventInfos;
+	}
+
+	/**
+	 * Returns a list of relevant Group Infos
+	 * @return relevant Group Infos
+	 */
+	protected LinkedHashMap<String,String> getGroupInfo(){
+		return this.groupInfos;
 	}
 	/**
 	 * Returns the current simulation time from the SimClock

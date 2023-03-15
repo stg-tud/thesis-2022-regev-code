@@ -146,7 +146,8 @@ public class MessageStatsReport extends Report implements MessageListener {
 		write("BucketPolicy: " + getBucketPolicy().toString());
 		write("DropPolicy: " + getDropPolicy().toString());
 		write("SendingPolicy: " + getSendingPolicy().toString());
-		write("EventInfos: " + getEventsInfo());
+		write("EventInfo: " + getEventsInfo());
+		write("GroupInfo: " + getGroupInfo());
 		double deliveryProb = 0; // delivery probability
 		double responseProb = 0; // request-response success probability
 		double overHead = Double.NaN;	// overhead ratio
