@@ -142,9 +142,11 @@ public class MessageStatsReport extends Report implements MessageListener {
 		write("Message stats for scenario " + getScenarioName() +
 				"\nsim_time: " + format(getSimTime()));
 
-		write("BucketPolicy: " + getBucketPolicy());
-		write("DropPolicy: " + getDropPolicy());
-		write("SendingPolicy: " + getSendingPolicy());
+		write("RouterTypes: " + getRouterList());
+		write("BucketPolicy: " + getBucketPolicy().toString());
+		write("DropPolicy: " + getDropPolicy().toString());
+		write("SendingPolicy: " + getSendingPolicy().toString());
+		write("EventInfos: " + getEventsInfo());
 		double deliveryProb = 0; // delivery probability
 		double responseProb = 0; // request-response success probability
 		double overHead = Double.NaN;	// overhead ratio
