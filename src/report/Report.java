@@ -76,6 +76,18 @@ public abstract class Report {
 	private String bucketPolicy;
 
 	/**
+	 * Settings Identifier for Sending Policy
+	 */
+	public static final String SENDING_POLICY_S = "Group.SendingPolicy";
+	private String sendingPolicy;
+
+	/**
+	 * Settings Identifier for Drop Policy
+	 */
+	public static final String DROP_POLICY_S = "Group.DropPolicy";
+	private String dropPolicy;
+
+	/**
 	 * Constructor.
 	 * Looks for a className.output setting in the Settings and
 	 * if such is found, uses that as the output file name. Otherwise
@@ -96,6 +108,18 @@ public abstract class Report {
 		}
 		else {
 			this.bucketPolicy = "Default";
+		}
+		if (settings.containsNoNamespace(DROP_POLICY_S) && !settings.getSettingNoNamespace(DROP_POLICY_S).equals("defaultDropPolicy")) {
+			this.dropPolicy = settings.getSettingNoNamespace(DROP_POLICY_S);
+		}
+		else {
+			this.dropPolicy = "Default";
+		}
+		if (settings.containsNoNamespace(SENDING_POLICY_S) && !settings.getSettingNoNamespace(SENDING_POLICY_S).equals("DefaultsendPolicy")) {
+			this.sendingPolicy = settings.getSettingNoNamespace(SENDING_POLICY_S);
+		}
+		else {
+			this.sendingPolicy = "Default";
 		}
 		if (settings.contains(INTERVAL_SETTING)) {
 			outputInterval = settings.getDouble(INTERVAL_SETTING);
@@ -284,6 +308,20 @@ public abstract class Report {
 		return this.bucketPolicy;
 	}
 
+	/**
+	 * Returns the name of the sendingPolicy
+	 * @return the name of the sendingPolicy
+	 */
+	protected String getSendingPolicy(){
+		return this.sendingPolicy;
+	}
+	/**
+	 * Returns the name of the dropPolicy
+	 * @return the name of the dropPolicy
+	 */
+	protected String getDropPolicy(){
+		return this.dropPolicy;
+	}
 	/**
 	 * Returns the current simulation time from the SimClock
 	 * @return the current simulation time from the SimClock
