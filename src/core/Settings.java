@@ -418,6 +418,33 @@ public class Settings {
 		outputSetting(fullPropName + " = " + value);
 		return value;
 	}
+	/**
+	 * Method to directly access a setting without automatic lookup of Namespaces [USE CAREFULLY]
+	 * @param name settings name
+	 * @return settings value
+	 */
+	public String getSettingNoNamespace(String name) {
+		return props.getProperty(name);
+	}
+
+	/**
+	 * checks if settings contains a specific value ignoring namespaces [USE CAREFULLY]
+	 * @param name settings name
+	 * @return boolean, whether setting exists
+	 */
+	public boolean containsNoNamespace(String name) {
+		try {
+			String value = getSettingNoNamespace(name);
+			if (value == null) {
+				return false;
+			}
+
+			else return value.trim().length() > 0;
+		}
+		catch (SettingsError e) {
+			return false; // didn't find the setting
+		}
+	}
 
 	/**
 	 * Returns the given setting if it exists, or defaultValue if the setting

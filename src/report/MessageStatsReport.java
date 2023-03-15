@@ -27,6 +27,7 @@ public class MessageStatsReport extends Report implements MessageListener {
 	private List<Integer> hopCounts;
 	private List<Double> msgBufferTime;
 	private List<Double> rtt; // round trip times
+	private List<String> misc;
 
 	private int nrofDropped;
 	private int nrofRemoved;
@@ -53,6 +54,7 @@ public class MessageStatsReport extends Report implements MessageListener {
 		this.msgBufferTime = new ArrayList<Double>();
 		this.hopCounts = new ArrayList<Integer>();
 		this.rtt = new ArrayList<Double>();
+		this.misc = new ArrayList<String>();
 
 		this.nrofDropped = 0;
 		this.nrofRemoved = 0;
@@ -139,6 +141,9 @@ public class MessageStatsReport extends Report implements MessageListener {
 	public void done() {
 		write("Message stats for scenario " + getScenarioName() +
 				"\nsim_time: " + format(getSimTime()));
+
+		write("BucketPolicy: " + getBucketPolicy());
+
 		double deliveryProb = 0; // delivery probability
 		double responseProb = 0; // request-response success probability
 		double overHead = Double.NaN;	// overhead ratio

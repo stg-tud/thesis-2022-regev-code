@@ -62,11 +62,18 @@ public abstract class Report {
 	protected int warmupTime;
 	protected Set<String> warmupIDs;
 
+
 	private int lastOutputSuffix;
 	private double outputInterval;
 	private double lastReportTime;
 	private String outFileName;
 	private String scenarioName;
+
+	/**
+	 * Settings Identifier for Bucket Policy
+	 */
+	public static final String BUCKET_POLICY_S = "Group.BucketPolicy";
+	private String bucketPolicy;
 
 	/**
 	 * Constructor.
@@ -84,7 +91,12 @@ public abstract class Report {
 				SimScenario.SCENARIO_NS + "." +	SimScenario.NAME_S));
 
 		settings = getSettings();
-
+		if (settings.containsNoNamespace(BUCKET_POLICY_S) && !settings.getSettingNoNamespace(BUCKET_POLICY_S).equals("DefaultBucketAssignmentPolicy")) {
+			this.bucketPolicy = settings.getSettingNoNamespace(BUCKET_POLICY_S);
+		}
+		else {
+			this.bucketPolicy = "Default";
+		}
 		if (settings.contains(INTERVAL_SETTING)) {
 			outputInterval = settings.getDouble(INTERVAL_SETTING);
 		}
@@ -262,6 +274,14 @@ public abstract class Report {
 	 */
 	protected String getScenarioName() {
 		return this.scenarioName;
+	}
+
+	/**
+	 * Returns the name of the bucketPolicy
+	 * @return the name of the bucketPolicy
+	 */
+	protected String getBucketPolicy(){
+		return this.bucketPolicy;
 	}
 
 	/**
