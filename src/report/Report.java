@@ -139,6 +139,16 @@ public abstract class Report {
 			if(settings.containsNoNamespace(GROUP_NS + ix + "." + ROUTER_S)){
 				this.routerList.put(GROUP_NS + ix, settings.getSettingNoNamespace(GROUP_NS + ix + "." + ROUTER_S));
 				readPolicies(ix,settings);
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "movementModel")){
+					String mm = settings.getSettingNoNamespace(GROUP_NS + ix + "." + "movementModel");
+					if(mm.equals("ExternalMovement")){		
+						this.groupInfos.put(GROUP_NS + ix + "." + "movementModel","ExternalMovement:" + settings.getSettingNoNamespace("ExternalMovement" + ix + ".file"));
+					}
+					else{
+						this.groupInfos.put(GROUP_NS + ix + "." + "movementModel",mm);
+					}
+					
+				}
 				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "bufferSize")){
 					this.groupInfos.put(GROUP_NS + ix + "." + "bufferSize",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "bufferSize"));
 				}
