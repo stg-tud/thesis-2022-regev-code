@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -62,12 +63,45 @@ public abstract class Report {
 	protected int warmupTime;
 	protected Set<String> warmupIDs;
 
+
 	private int lastOutputSuffix;
 	private double outputInterval;
 	private double lastReportTime;
 	private String outFileName;
 	private String scenarioName;
 
+	public static final String GROUP_NS = "Group";
+	public int MAX_GROUPIDs;
+	public static final String NR_GROUPS_S = "Scenario.nrofHostGroups";
+	public static final String defaultPolicy = "Default";
+	public LinkedHashMap<String,String> groupInfos;
+	/**
+	 * Settings Identifier for Bucket Policy
+	 */
+	public static final String BUCKET_POLICY_S = "BucketPolicy";
+	private LinkedHashMap<String,String> bucketPolicy;
+	private static final String defaultBucketPolicy = "DefaultBucketAssignmentPolicy";
+
+	/**
+	 * Settings Identifier for Sending Policy
+	 */
+	public static final String SENDING_POLICY_S = "SendingPolicy";
+	private LinkedHashMap<String,String> sendingPolicy;
+	private static final String defaultSendingPolicy = "DefaultsendPolicy";
+
+	/**
+	 * Settings Identifier for Drop Policy
+	 */
+	public static final String DROP_POLICY_S = "DropPolicy";
+	private LinkedHashMap<String,String> dropPolicy;
+	private static final String defaultDropPolicy = "defaultDropPolicy";
+
+	public static final String ROUTER_S = "router";
+	private LinkedHashMap<String,String> routerList;
+
+
+	public static final String EVENT_NS = "Events";
+	private LinkedHashMap<String,String> eventInfos;
 	/**
 	 * Constructor.
 	 * Looks for a className.output setting in the Settings and
@@ -82,9 +116,80 @@ public abstract class Report {
 		Settings settings = new Settings();
 		scenarioName = settings.valueFillString(settings.getSetting(
 				SimScenario.SCENARIO_NS + "." +	SimScenario.NAME_S));
-
 		settings = getSettings();
 
+		if(settings.containsNoNamespace(NR_GROUPS_S)){
+			this.MAX_GROUPIDs = Integer.parseInt(settings.getSettingNoNamespace(NR_GROUPS_S));
+		}
+		else{
+			this.MAX_GROUPIDs = 9;
+		}
+		this.groupInfos = new LinkedHashMap<String,String>();
+		this.bucketPolicy = new LinkedHashMap<String,String>();
+		this.sendingPolicy = new LinkedHashMap<String,String>();
+		this.dropPolicy = new LinkedHashMap<String,String>();
+		this.routerList = new LinkedHashMap<String,String>();
+
+		// Reading out of Group Router and Infos + drop, sending and bucket policies
+		for(int i=0; i <= MAX_GROUPIDs; i++){
+			String ix = Integer.toString(i);
+			if(i == 0){
+				ix = "";
+			}
+			if(settings.containsNoNamespace(GROUP_NS + ix + "." + ROUTER_S)){
+				this.routerList.put(GROUP_NS + ix, settings.getSettingNoNamespace(GROUP_NS + ix + "." + ROUTER_S));
+				readPolicies(ix,settings);
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "movementModel")){
+					String mm = settings.getSettingNoNamespace(GROUP_NS + ix + "." + "movementModel");
+					if(mm.equals("ExternalMovement")){		
+						this.groupInfos.put(GROUP_NS + ix + "." + "movementModel","ExternalMovement:" + settings.getSettingNoNamespace("ExternalMovement" + ix + ".file"));
+					}
+					else{
+						this.groupInfos.put(GROUP_NS + ix + "." + "movementModel",mm);
+					}
+					
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "bufferSize")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "bufferSize",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "bufferSize"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "waitTime")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "waitTime",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "waitTime"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "nrofInterfaces")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "nrofInterfaces",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "nrofInterfaces"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "speed")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "speed",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "speed"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "msgTtl")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "msgTtl",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "msgTtl"));
+				}
+				if(settings.containsNoNamespace(GROUP_NS + ix + "." + "nrofHosts")){
+					this.groupInfos.put(GROUP_NS + ix + "." + "nrofHosts",settings.getSettingNoNamespace(GROUP_NS + ix + "." + "nrofHosts"));
+				}
+			}
+			else{
+				break;
+			}
+		}
+		this.eventInfos = new LinkedHashMap<String,String>();
+		if(settings.containsNoNamespace(EVENT_NS + "." + "nrof")){
+			for(int ix=1; ix <= Integer.parseInt(settings.getSettingNoNamespace(EVENT_NS + "." + "nrof")); ix++){
+				if(settings.containsNoNamespace(EVENT_NS + ix + "." + "class")){
+					this.eventInfos.put(EVENT_NS + ix + "." + "class",settings.getSettingNoNamespace(EVENT_NS + ix + "." + "class"));
+				}
+				if(settings.containsNoNamespace(EVENT_NS + ix + "." + "interval")){
+					this.eventInfos.put(EVENT_NS + ix + "." + "interval",settings.getSettingNoNamespace(EVENT_NS + ix + "." + "interval"));
+				}
+				if(settings.containsNoNamespace(EVENT_NS + ix + "." + "size")){
+					this.eventInfos.put(EVENT_NS + ix + "." + "size",settings.getSettingNoNamespace(EVENT_NS + ix + "." + "size"));
+				}
+				if(settings.containsNoNamespace(EVENT_NS + ix + "." + "hosts")){
+					this.eventInfos.put(EVENT_NS + ix + "." + "hosts",settings.getSettingNoNamespace(EVENT_NS + ix + "." + "hosts"));
+				}
+			}
+
+		}
 		if (settings.contains(INTERVAL_SETTING)) {
 			outputInterval = settings.getDouble(INTERVAL_SETTING);
 		}
@@ -264,6 +369,77 @@ public abstract class Report {
 		return this.scenarioName;
 	}
 
+	protected void readPolicies(String ix, Settings settings){
+		String bucketID = GROUP_NS + ix + "." + BUCKET_POLICY_S;
+		String dropID = GROUP_NS + ix + "." + DROP_POLICY_S;
+		String sendingID = GROUP_NS + ix + "." + SENDING_POLICY_S;
+
+
+		if (settings.containsNoNamespace(bucketID) && !settings.getSettingNoNamespace(bucketID).equals(defaultBucketPolicy)) {
+			this.bucketPolicy.put(GROUP_NS + ix,settings.getSettingNoNamespace(bucketID));
+		}
+		else {
+			this.bucketPolicy.put(GROUP_NS + ix, defaultPolicy);
+		}
+		if (settings.containsNoNamespace(dropID) && !settings.getSettingNoNamespace(dropID).equals(defaultDropPolicy)) {
+			this.dropPolicy.put(GROUP_NS + ix, settings.getSettingNoNamespace(dropID));
+		}
+		else {
+			this.dropPolicy.put(GROUP_NS + ix, defaultPolicy);
+		}
+		if (settings.containsNoNamespace(sendingID) && !settings.getSettingNoNamespace(sendingID).equals(defaultSendingPolicy)) {
+			this.sendingPolicy.put(GROUP_NS + ix, settings.getSettingNoNamespace(sendingID));
+		}
+		else {
+			this.sendingPolicy.put(GROUP_NS + ix, defaultPolicy);
+		}
+	}
+	/**
+	 * Returns the list of the names of the bucketPolicies
+	 * @return bucketPolicy List
+	 */
+	protected LinkedHashMap<String,String> getBucketPolicy(){
+		return this.bucketPolicy;
+	}
+
+	/**
+	 * Returns the list of the names of the getSendingPolicies
+	 * @return getSendingPolicy List
+	 */
+	protected LinkedHashMap<String,String> getSendingPolicy(){
+		return this.sendingPolicy;
+	}
+	/**
+	 * Returns the list of the names of the dropPolicies
+	 * @return dropPolicy List
+	 */
+	protected LinkedHashMap<String,String> getDropPolicy(){
+		return this.dropPolicy;
+	}
+
+	/**
+	 * Returns a list of the present router groups
+	 * @return list of router groups
+	 */
+	protected LinkedHashMap<String,String> getRouterList(){
+		return this.routerList;
+	}
+
+	/**
+	 * Returns a list of relevant Events Infos
+	 * @return relevant Events Infos
+	 */
+	protected LinkedHashMap<String,String> getEventsInfo(){
+		return this.eventInfos;
+	}
+
+	/**
+	 * Returns a list of relevant Group Infos
+	 * @return relevant Group Infos
+	 */
+	protected LinkedHashMap<String,String> getGroupInfo(){
+		return this.groupInfos;
+	}
 	/**
 	 * Returns the current simulation time from the SimClock
 	 * @return the current simulation time from the SimClock
