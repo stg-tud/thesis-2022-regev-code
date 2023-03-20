@@ -425,8 +425,9 @@ public class ProphetRouterWithEstimation extends ActiveRouter {
 		List<Tuple<Message, Connection>> messages =
 			new ArrayList<Tuple<Message, Connection>>();
 
-		Collection<Message> msgCollection = getMessageCollection(-1);
-
+		for(int i = 0; i < getCountBuckets(); i++){
+			List<Tuple<Message, Connection>> bucketMessages = new ArrayList<Tuple<Message,Connection>>();
+			Collection<Message> bucketMsgCollection = getMessageCollection(i);
 		/* for all connected hosts collect all messages that have a higher
 		   probability of delivery by the other host */
 		for (Connection con : getConnections()) {
@@ -437,23 +438,23 @@ public class ProphetRouterWithEstimation extends ActiveRouter {
 				continue; // skip hosts that are transferring
 			}
 
-			for (Message m : msgCollection) {
+			for (Message m : bucketMsgCollection) {
 				if (othRouter.hasMessage(m.getId())) {
 					continue; // skip messages that the other one has
 				}
 				if (othRouter.getPredFor(m.getTo()) > getPredFor(m.getTo())) {
 					// the other node has higher probability of delivery
-					messages.add(new Tuple<Message, Connection>(m,con));
+					bucketMessages.add(new Tuple<Message, Connection>(m,con));
 				}
 			}
 		}
 
-		if (messages.size() == 0) {
-			return null;
-		}
-
-		// sort the message-connection tuples
-		Collections.sort(messages, new TupleComparator());
+		if (bucketMessages.size() != 0) {
+			// sort the message-connection tuples
+			Collections.sort(bucketMessages, new TupleComparator());
+			messages.addAll(bucketMessages);
+		}	
+	}
 		return tryMessagesForConnected(messages);	// try to send messages
 	}
 
