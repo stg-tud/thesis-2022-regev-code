@@ -40,9 +40,10 @@ for routing_dir in os.listdir(args.path):
             movement_model = MS_File.split(".")[0]
             count_nodes = MS_File.split("_")[1]
             run_index = routing_dir.split("_")[1]
+            routing_algo = routing_dir.split("_")[0]
             try:
                 values = extract_values_from_file(os.path.join(os.getcwd(),args.path,routing_dir,bucket_dir,"movement_models",MS_File))
-                output.append([routing_dir,run_index,movement_model,bucket_policy,send_policy,count_nodes,values["sim_time"],values["created"],values["started"],values["relayed"],values["aborted"],values["dropped"],values["removed"],values["delivery_prob"],values["response_prob"],values["overhead_ratio"],values["latency_avg"],values["latency_med"],values["hopcount_avg"],values["hopcount_med"],values["buffertime_avg"],values["buffertime_med"],values["rtt_avg"],values["rtt_med"]])
+                output.append([routing_algo,run_index,movement_model,bucket_policy,send_policy,count_nodes,values["sim_time"],values["created"],values["started"],values["relayed"],values["aborted"],values["dropped"],values["removed"],values["delivery_prob"],values["response_prob"],values["overhead_ratio"],values["latency_avg"],values["latency_med"],values["hopcount_avg"],values["hopcount_med"],values["buffertime_avg"],values["buffertime_med"],values["rtt_avg"],values["rtt_med"]])
             except:
                 print("Failed for %s" % os.path.join(os.getcwd(),args.path,routing_dir,bucket_dir,"movement_models",MS_File))
 
