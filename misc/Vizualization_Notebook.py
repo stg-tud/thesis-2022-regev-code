@@ -291,3 +291,43 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
     
 
+
+# # 
+# <font size="15">Relplot</font>
+
+# In[15]:
+
+
+# Filter for RUN ID
+current_df = df_runa
+
+#Filter for Routing Algorithm
+current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
+                                                                 'SprayAndWaitRouter-7t','ProphetRouter', 'ProphetV2Router'])] 
+#Filter for Bucket Policy
+current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
+ 'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
+ 'prioritizeLowTTLBucketPolicy','randomBucketPolicy',
+ 'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
+ 'sourceSegregationBucketPolicy']))]
+
+#Filter for Movement Model
+current_df = current_df.loc[current_df["MovementModel"].isin(['MG1_100_24h', 'MG2_100_24h', 'MG3_100_24h', 'MG4_100_24h', 'MG5_100_24h',
+ 'RW1_100_24h', 'RW2_100_24h', 'RW3_100_24h', 'RW4_100_24h', 'RW5_100_24h'])]
+
+for i,routingAlgo in enumerate(current_df["RoutingAlgorithm"].unique()):
+    plt.figure(i)
+    ax = sns.relplot(
+        data=current_df, x="MovementModel", y="delivery_prob",
+        hue="BucketPolicy", kind="line",
+    )
+    ax.fig.suptitle(routingAlgo,
+                  fontsize=24, fontdict={"weight": "bold"})
+    ax.tick_params(axis='x', rotation=90)
+
+
+# In[ ]:
+
+
+
+
