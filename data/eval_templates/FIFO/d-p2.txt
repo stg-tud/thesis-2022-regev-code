@@ -7,7 +7,7 @@ Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;fri
 Group.SendingPolicy = FIFOsendPolicy
 
 Scenario.simulateConnections = true
-Scenario.updateInterval = 0.1
+Scenario.updateInterval = 1
 Scenario.endTime = 43000
 
 
