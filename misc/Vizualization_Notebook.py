@@ -26,12 +26,17 @@ df = pd.read_csv(csv_path, skiprows=[0])
 df_runa = df.loc[df['RunID'] == "runa"]
 df_runb = df.loc[df['RunID'] == "runb"]
 df_runc = df.loc[df['RunID'] == "runc"]
-df_runs = [df_runa,df_runb,df_runc]
+df_rund = df.loc[df['RunID'] == "rund"]
+df_rune = df.loc[df['RunID'] == "rune"]
+df_runf = df.loc[df['RunID'] == "runf"]
+df_rung = df.loc[df['RunID'] == "rung"]
+df_runh = df.loc[df['RunID'] == "runh"]
+df_runs = [df_runa,df_runb,df_runc,df_rund,df_rune,df_runf,df_rung,df_runh]
 
 epidemicVSsnw = ['EpidemicRouter', 'SprayAndWaitRouter-7f', 'SprayAndWaitRouter-7t']
 epidemicVSprophet = ['EpidemicRouter', 'ProphetRouter', 'ProphetV2Router']
 
-
+runids = {0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k"}
 #SYNTAX df.loc[ (expr1) & (expr2) | ...]  => Klammern nicht vergessen
 # expr: df["FIELD"] == "VALUE"
 
@@ -86,7 +91,7 @@ sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
 # <font size="5">Delivery Probability</font>
 # 
 
-# In[7]:
+# In[18]:
 
 
 for i in range(len(df_runs)):
@@ -97,13 +102,15 @@ for i in range(len(df_runs)):
                 data=df_runs[i] )
     boxplot.set_xticklabels(boxplot.get_xticklabels(),rotation=30)
     sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
+    plt.suptitle("Run" + runids[i],
+                  fontsize=24, fontdict={"weight": "bold"})
 
 
 # In[8]:
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_runh
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -130,7 +137,7 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rung
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -157,7 +164,7 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rung
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -191,8 +198,11 @@ for i in range(len(df_runs)):
     scatterplot = sns.scatterplot(y="RoutingAlgorithm", x="delivery_prob",
                 hue="BucketPolicy",
                 data=df_runs[i])
+    plt.suptitle("Run" + runids[i],
+                  fontsize=24, fontdict={"weight": "bold"})
     try:
         sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
+        
     except:
         continue
     
@@ -202,7 +212,7 @@ for i in range(len(df_runs)):
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rung
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -234,7 +244,7 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rund
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -266,7 +276,7 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rung
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -299,7 +309,7 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
 
 # Filter for RUN ID
-current_df = df_runa
+current_df = df_rund
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
