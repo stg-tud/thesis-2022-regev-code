@@ -61,7 +61,7 @@ Events2.size = 100,1k
 Events2.hosts = 33,66
 Events2.tohosts = 33,66
 # Message ID prefix
-Events2.prefix = M
+Events2.prefix = N
 
 Events3.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
@@ -73,7 +73,7 @@ Events3.size = 100,1k
 Events3.hosts = 66,100
 Events3.tohosts = 66,100
 # Message ID prefix
-Events3.prefix = M
+Events3.prefix = O
 
 ## Movement model settings
 # seed for movement models' pseudo random number generator (default = 0)
