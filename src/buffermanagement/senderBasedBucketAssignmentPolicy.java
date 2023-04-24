@@ -16,7 +16,7 @@ public class senderBasedBucketAssignmentPolicy extends BucketAssignmentPolicy {
         if(m.getFrom().equals(currentHost)){
             return 0;
         }
-        else if(m.getFrom().equals(m.getHops().get(0))){
+        else if(m.getFrom().equals(m.getHops().get(m.getHops().size() -2 ))){
             return 1;
         }
         else{
