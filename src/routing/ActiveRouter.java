@@ -28,7 +28,7 @@ import core.MessageListener;
 import core.NetworkInterface;
 import core.Settings;
 import core.SimClock;
-import droppolicy.defaultDropPolicy;
+import droppolicy.dropFrontPolicy;
 import droppolicy.dropPolicy;
 import attacks.Attack;
 /**
@@ -91,7 +91,7 @@ public abstract class ActiveRouter extends MessageRouter {
 			this.dropMode = (dropPolicy) s.createIntializedObject("droppolicy." + dropPolicyClass);
 		}
 		else {
-			this.dropMode = new defaultDropPolicy(s);
+			this.dropMode = new dropFrontPolicy(s);
 		}
 		this.influencingAttacks = new ArrayList<Attack>();
 
