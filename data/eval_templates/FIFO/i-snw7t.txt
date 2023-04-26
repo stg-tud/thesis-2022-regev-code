@@ -3,19 +3,19 @@ Group.router = [SprayAndWaitRouter]
 SprayAndWaitRouter.nrofCopies = 7
 SprayAndWaitRouter.binaryMode = true
 Group.movementModel = ExternalMovement
-ExternalMovement.file =[thesis-2022-regev-code/movement_models/RW1_100_24h.one;thesis-2022-regev-code/movement_models/RW2_100_24h.one;thesis-2022-regev-code/movement_models/RW3_100_24h.one;thesis-2022-regev-code/movement_models/RW4_100_24h.one;thesis-2022-regev-code/movement_models/RW5_100_24h.one;thesis-2022-regev-code/movement_models/MG1_100_24h.one;thesis-2022-regev-code/movement_models/MG2_100_24h.one;thesis-2022-regev-code/movement_models/MG3_100_24h.one;thesis-2022-regev-code/movement_models/MG4_100_24h.one;thesis-2022-regev-code/movement_models/MG5_100_24h.one]
-Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; senderBasedBucketAssignmentPolicy;sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
+ExternalMovement.file =[thesis-2022-regev-code/movement_models/RW1_100_24h.one;thesis-2022-regev-code/movement_models/RW2_100_24h.one;thesis-2022-regev-code/movement_models/RW3_100_24h.one;thesis-2022-regev-code/movement_models/RW4_100_24h.one;thesis-2022-regev-code/movement_models/RW5_100_24h.one;thesis-2022-regev-code/movement_models/MG1_100_24h.one;thesis-2022-regev-code/movement_models/MG2_100_24h.one;thesis-2022-regev-code/movement_models/MG3_100_24h.one;thesis-2022-regev-code/movement_models/MG4_100_24h.one]
+Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
 Group.SendingPolicy = FIFOsendPolicy
 
 Scenario.simulateConnections = true
-Scenario.updateInterval = 2
+Scenario.updateInterval = 0.1
 Scenario.endTime = 43000
 
 
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
-wifiInterface.transmitSpeed = 996570k
+wifiInterface.transmitSpeed = 16570k
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
