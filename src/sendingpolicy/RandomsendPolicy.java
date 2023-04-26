@@ -2,9 +2,11 @@ package sendingpolicy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -30,11 +32,32 @@ public class RandomsendPolicy extends sendPolicy {
                 return messages;
     }
 
-    @Override
-    public List<Message> sortMessageListByPolicy(List<Message> MessageBuffer) {
-        Collections.shuffle(MessageBuffer, new Random(SimClock.getIntTime()));
-        return MessageBuffer;
+    public List<Message> sortMessageListByPolicy(List<Message> messageBuffer) {
+        Map<Integer, List<Message>> bucketedMessages = new HashMap<>();
+        for (Message m : messageBuffer) {
+            Integer bucket = (Integer) m.getProperty("Bucket");
+            if (bucket == null) {
+                bucket = m.getFrom().getRouter().getCountBuckets();
+            }
+            bucketedMessages.computeIfAbsent(bucket, k -> new ArrayList<>()).add(m);
+        }
+
+        for (List<Message> messagesInBucket : bucketedMessages.values()) {
+            Collections.shuffle(messagesInBucket, new Random(SimClock.getIntTime()));
+        }
+
+        List<Message> sortedMessages = new ArrayList<>();
+        bucketedMessages.keySet().stream()
+                .sorted()
+                .forEach(bucket -> sortedMessages.addAll(bucketedMessages.get(bucket)));
+    
+        for (Message item : sortedMessages) {
+            System.out.print(item.getProperty("Bucket") + " ");
+        }
+        System.out.println();
+        return sortedMessages;
     }
+    
 
     @Override
     public LinkedHashMap<String, Message> sortBucketByPolicy(LinkedHashMap<String, Message> MessageBuffer) {
@@ -47,13 +70,28 @@ public class RandomsendPolicy extends sendPolicy {
     }
 
     @Override
-    public int compareMessagesByPolicy(Message m1, Message m2) {
-        int hash_diff = m1.hashCode() - m2.hashCode();
-			if (hash_diff == 0) {
-				return 0;
-			}
-			return (hash_diff < 0 ? -1 : 1);
+public int compareMessagesByPolicy(Message m1, Message m2) {
+    Integer bucket1 = (Integer) m1.getProperty("Bucket");
+    if (bucket1 == null) {
+        bucket1 = m1.getFrom().getRouter().getCountBuckets();
     }
+
+    Integer bucket2 = (Integer) m2.getProperty("Bucket");
+    if (bucket2 == null) {
+        bucket2 = m2.getFrom().getRouter().getCountBuckets();
+    }
+
+    if (!bucket1.equals(bucket2)) {
+        return bucket1.compareTo(bucket2);
+    }
+
+    int hash_diff = m1.hashCode() - m2.hashCode();
+    if (hash_diff == 0) {
+        return 0;
+    }
+    return (hash_diff < 0 ? -1 : 1);
+}
+
 
     @Override
     public LinkedHashSet<Connection> sortConnectionByPriority(LinkedHashSet<Connection> connections) {
