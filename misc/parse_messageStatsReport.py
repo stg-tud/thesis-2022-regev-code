@@ -26,7 +26,7 @@ def extract_values_from_file(file_path):
 
     return values
 
-output = [["sep=,"],["RoutingAlgorithm","RunID","MovementModel","BucketPolicy","SendPolicy","DropPolicy","Nodes","sim_time","created","started","relayed","aborted","dropped","removed","delivery_prob","response_prob","overhead_ratio","latency_avg","latency_med","hopcount_avg","hopcount_med","buffertime_avg","buffertime_med","rtt_avg","rtt_med"]]
+output = [["sep=,"],["RoutingAlgorithm","Scenario","MovementModel","BucketPolicy","SendPolicy","DropPolicy","Nodes","sim_time","created","started","relayed","aborted","dropped","removed","delivery_prob","response_prob","overhead_ratio","latency_avg","latency_med","hopcount_avg","hopcount_med","buffertime_avg","buffertime_med","rtt_avg","rtt_med"]]
 
 for routing_dir in os.listdir(args.input):
     for bucket_dir in os.listdir(os.path.join(args.input,routing_dir)):
