@@ -6,6 +6,12 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+
+if [ -z "$2" ]; then
+  echo "Error: Please provide the number of runs parameter"
+  exit 1
+fi
+
 # Remove the trailing / from the folder path (if present)
 folder=${1%/}
 
@@ -28,7 +34,7 @@ for file in "$folder"/*; do
     for i in {0..3}; do
       if ! pgrep -a one.sh | grep -q numactl.*-C.*$i; then
         # Bind the process to the CPU using numactl, and launch the process in the background
-        numactl --physcpubind=$i ./thesis-2022-regev-code/one.sh -b 90 "$file" &
+        numactl --physcpubind=$i ./thesis-2022-regev-code/one.sh -b $2 "$file" &
         ((running_processes++))
         break
       fi
