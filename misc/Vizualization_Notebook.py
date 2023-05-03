@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[66]:
 
 
+for var in list(globals()):
+    del globals()[var]
+    
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
@@ -11,32 +14,33 @@ import csv
 import seaborn as sns
 
 
-# In[2]:
+# In[67]:
 
 
-csv_path=os.path.join(os.getcwd(),"messageStatsReports.csv")
-#csv_path=os.path.join(os.getcwd(),"messageStatsReports_smallBuffer.csv")
-
-
-# In[3]:
-
-
-#read csv
+csv_path=os.path.join(os.getcwd(),"messageStatsReports_Epidemic.csv")
 df = pd.read_csv(csv_path, skiprows=[0])
-df_runa = df.loc[df['RunID'] == "runa"]
-df_runb = df.loc[df['RunID'] == "runb"]
-df_runc = df.loc[df['RunID'] == "runc"]
-df_rund = df.loc[df['RunID'] == "rund"]
-df_rune = df.loc[df['RunID'] == "rune"]
-df_runf = df.loc[df['RunID'] == "runf"]
-df_rung = df.loc[df['RunID'] == "rung"]
-df_runh = df.loc[df['RunID'] == "runh"]
-df_runs = [df_runa,df_runb,df_runc,df_rund,df_rune,df_runf,df_rung,df_runh]
 
-epidemicVSsnw = ['EpidemicRouter', 'SprayAndWaitRouter-7f', 'SprayAndWaitRouter-7t']
-epidemicVSprophet = ['EpidemicRouter', 'ProphetRouter', 'ProphetV2Router']
 
-runids = {0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k"}
+# In[68]:
+
+
+print(df["Scenario"].unique())
+
+
+# In[70]:
+
+
+scenario_names = []
+df_runs = []
+for scenario in df["Scenario"].unique():
+    scenario_names.append(scenario)
+    globals()[scenario] = df.loc[df['Scenario'] == scenario]
+    
+for var_name in globals():
+    if isinstance(globals()[var_name], pd.DataFrame) and var_name.startswith("scenario"):
+        df_runs.append((var_name, globals()[var_name]))
+
+
 #SYNTAX df.loc[ (expr1) & (expr2) | ...]  => Klammern nicht vergessen
 # expr: df["FIELD"] == "VALUE"
 
@@ -47,7 +51,7 @@ runids = {0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k"}
 # Beispiel: hue=df_runs[i][["BucketPolicy","MovementModel"]].apply(tuple, axis=1)
 
 
-# In[4]:
+# In[59]:
 
 
 """
@@ -72,14 +76,7 @@ current_df = current_df.loc[current_df["MovementModel"].isin(['MG1_100_24h', 'MG
 ("")
 
 
-# In[5]:
-
-
-#print(df.head(0))
-print(df["MovementModel"].unique())
-
-
-# In[6]:
+# In[74]:
 
 
 sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
@@ -91,7 +88,7 @@ sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
 # <font size="5">Delivery Probability</font>
 # 
 
-# In[18]:
+# In[75]:
 
 
 for i in range(len(df_runs)):
@@ -99,18 +96,18 @@ for i in range(len(df_runs)):
     
     boxplot = sns.boxplot(x="RoutingAlgorithm", y="delivery_prob",
                 hue="BucketPolicy",
-                data=df_runs[i] )
+                data=df_runs[i][1] )
     boxplot.set_xticklabels(boxplot.get_xticklabels(),rotation=30)
     sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
-    plt.suptitle("Run" + runids[i],
+    plt.suptitle("Run" + df_runs[i][0],
                   fontsize=24, fontdict={"weight": "bold"})
 
 
-# In[8]:
+# In[76]:
 
 
 # Filter for RUN ID
-current_df = df_runh
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -133,11 +130,11 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Latency Median</font>
 
-# In[9]:
+# In[77]:
 
 
 # Filter for RUN ID
-current_df = df_rung
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -150,7 +147,7 @@ current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssi
  'sourceSegregationBucketPolicy']))]
 
 
-boxplot = sns.boxplot(x="RoutingAlgorithm", y="latency_med",
+boxplot = sns.boxplot(x="RoutingAlgorithm", y="latency_avg",
             hue="BucketPolicy",
             data=current_df )
 
@@ -160,11 +157,11 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Overhead Ratio</font>
 
-# In[10]:
+# In[78]:
 
 
 # Filter for RUN ID
-current_df = df_rung
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -190,15 +187,17 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Delivery Probability</font>
 
-# In[11]:
+# In[80]:
 
 
 for i in range(len(df_runs)):
+    # Filter for direct comparison
+
     plt.figure(i)
     scatterplot = sns.scatterplot(y="RoutingAlgorithm", x="delivery_prob",
                 hue="BucketPolicy",
-                data=df_runs[i])
-    plt.suptitle("Run" + runids[i],
+                data=df_runs[i][1])
+    plt.suptitle("Run" + df_runs[i][0],
                   fontsize=24, fontdict={"weight": "bold"})
     try:
         sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
@@ -208,11 +207,11 @@ for i in range(len(df_runs)):
     
 
 
-# In[12]:
+# In[81]:
 
 
 # Filter for RUN ID
-current_df = df_rung
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -240,11 +239,11 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Latency Med</font>
 
-# In[13]:
+# In[82]:
 
 
 # Filter for RUN ID
-current_df = df_rund
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -272,11 +271,11 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Buffertime Med</font>
 
-# In[14]:
+# In[83]:
 
 
 # Filter for RUN ID
-current_df = df_rung
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
@@ -305,11 +304,11 @@ sns.move_legend(scatterplot , "upper left", bbox_to_anchor=(1, 1))
 # # 
 # <font size="15">Relplot</font>
 
-# In[15]:
+# In[84]:
 
 
 # Filter for RUN ID
-current_df = df_rund
+current_df = scenarioL
 
 #Filter for Routing Algorithm
 current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
