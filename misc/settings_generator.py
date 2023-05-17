@@ -1,32 +1,60 @@
 import os
-import pathlib
+import argparse
+import random
+
+parser = argparse.ArgumentParser(description='Generates distinct setting files from big ones')
+parser.add_argument('--input', type=str, help='the path to the directory containing the settings')
+parser.add_argument('--output', type=str, help='path where distinct settings should be generated')
+args = parser.parse_args()
 
 
-abspath = pathlib.Path(__file__).parent.resolve()
-bp = os.path.join(abspath,"generated_configs")
+def extract_values_from_file(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
 
-list_routing_algorithms = ["EpidemicRouter","SprayAndWaitRouter"]
-list_bufferpolicies= ["destinationBasedBucketPolicy", "forwardCountBucketPolicy","friendlyHostsBucketPolicy",
-"prioritizeLowTTLBucketPolicy", "randomBucketPolicy", "roundRobinBucketPolicy", "senderBasedBucketAssignmentPolicy",
-"sizeBasedBucketsPolicy","sourceSegregationBucketPolicy"]
-list_sendingpolicies = ["FIFOsendPolicy"]
-list_droppolicies = ["default"]
+    values = {}
+    for line in lines:
+        if '=' in line:
+            key, value = line.strip().split('=')
+            values[key.strip()] = value.strip()
 
-for routing_algorithm in list_routing_algorithms:
-    for bufferpolicy in list_bufferpolicies:
-        for sendingpolicy in list_sendingpolicies:
-            for droppolicy in list_droppolicies:
-                if os.path.exists(os.path.join(bp,routing_algorithm)) == False:
-                    os.mkdir(os.path.join(bp,routing_algorithm))
-                filename="%s_%s_%s_%s.txt" % (routing_algorithm,bufferpolicy,sendingpolicy,droppolicy)
-                with open(os.path.join(bp,routing_algorithm,filename), "w+") as file:
-                    file.write("Scenario.name = Routing %s Buffer %s Sending %s Drop %s\n" % (routing_algorithm,bufferpolicy,sendingpolicy,droppolicy))
-                    file.write("Group.router = %s\n" % (routing_algorithm))
-                    if bufferpolicy != "default":
-                        file.write("Group.BucketPolicy = %s\n" % (bufferpolicy))
-                    if sendingpolicy != "default":
-                        file.write("Group.SendingPolicy = %s\n" % (sendingpolicy))
-                    if droppolicy != "default":
-                        file.write("Group.DropPolicy = %s\n" % (sendingpolicy))
-                        
+    return values
+
+def generate_file(values, rA, bP, dP, sP, mM):
+    conf = ""
+    filename = "tmp-conf" + str(random.randint(1000000,999999999)) + ".txt"
+    for k,i in values.items():
+        if k == "Group.router":
+            conf += "%s = %s\n" % (k,rA)
+        elif k == "Group.BucketPolicy":
+            conf += "%s = %s\n" % (k,bP)
+        elif k == "Group.DropPolicy":
+            conf += "%s = %s\n" % (k,dP)
+        elif k == "Group.SendingPolicy":
+            conf += "%s = %s\n" % (k,sP)
+        elif k == "ExternalMovement.file":
+            conf += "%s = %s\n" % (k,mM)
+        else:
+            conf += "%s = %s\n" % (k,i)
+    with open(os.path.join(args.output,filename), 'w+') as out:
+        out.write(conf)
+
+
+for settingsFile in os.listdir(args.input):
+    values = extract_values_from_file(os.path.join(args.input,settingsFile))
+    routingAlgorithms = values["Group.router"].replace("[","").replace("]","").split(";")
+    bucketPolicies = values["Group.BucketPolicy"].replace("[","").replace("]","").split(";")
+    dropPolicies = values["Group.DropPolicy"].replace("[","").replace("]","").split(";")
+    sendingPolicies =  values["Group.SendingPolicy"].replace("[","").replace("]","").split(";")
+    movementModels = values["ExternalMovement.file"].replace("[","").replace("]","").split(";")
+    
+    for routingAlgo in routingAlgorithms:
+        for bucketPolicy in bucketPolicies:
+            for dropPolicy in dropPolicies:
+                for sendingPolicy in sendingPolicies:
+                    for movementModel in movementModels:
+                        generate_file(values,routingAlgo,bucketPolicy,dropPolicy,sendingPolicy,movementModel)
+print("Sucessfully generated setting files!")
+
+
 

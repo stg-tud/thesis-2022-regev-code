@@ -7,11 +7,6 @@ if [ -z "$1" ]; then
 fi
 
 
-if [ -z "$2" ]; then
-  echo "Error: Please provide the number of runs parameter"
-  exit 1
-fi
-
 # Remove the trailing / from the folder path (if present)
 folder=${1%/}
 
@@ -21,20 +16,24 @@ if [ ! -d "$folder" ]; then
   exit 1
 fi
 
+# Run settings_generator script
+confdir=$(mktemp -d)
+python3 thesis-2022-regev-code/misc/settings_generator.py --input "$1" --output "$confdir"
+
 # Set the maximum number of background processes to run at once
 max_processes=4
 # Initialize the counter for running background processes to 0
 running_processes=0
 
 # Iterate over the files in the folder
-for file in "$folder"/*; do
+for file in "$confdir"/*; do
   # Check if the file is a regular file (not a directory or symlink)
   if [ -f "$file" ]; then
     # Find a free CPU core to use
     for i in {0..3}; do
       if ! pgrep -a one.sh | grep -q numactl.*-C.*$i; then
         # Bind the process to the CPU using numactl, and launch the process in the background
-        numactl --physcpubind=$i ./thesis-2022-regev-code/one.sh -b $2 "$file" &
+        numactl --physcpubind=$i ./thesis-2022-regev-code/one.sh -b 1 "$file" &
         ((running_processes++))
         break
       fi
@@ -49,3 +48,5 @@ done
 
 # Wait for all remaining background processes to finish
 wait
+
+rm -rf "$confdir"
