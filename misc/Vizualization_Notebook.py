@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[73]:
 
 
 for var in list(globals()):
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import os
 import csv
 import seaborn as sns
-
+import numpy as np
 
 csv_path=os.path.join(os.getcwd(),"messageStatsReports_prophet.csv")
 df = pd.read_csv(csv_path, skiprows=[0])
@@ -29,10 +29,10 @@ for var_name in list(globals()):
         df_runs.append((var_name, globals()[var_name]))
 
 
-# In[2]:
+# In[94]:
 
 
-print(df["Scenario"].unique())
+print(df["DropPolicy"].unique())
 
 
 # In[10]:
@@ -78,9 +78,9 @@ sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
 
 
 # # 
-# <font size="15">Boxplots</font>
+# <font size="15">Delivery Probability</font>
 
-# <font size="5">Delivery Probability</font>
+# <font size="5">Delivery Probability All</font>
 # 
 
 # In[5]:
@@ -98,7 +98,9 @@ for i in range(len(df_runs)):
                   fontsize=24, fontdict={"weight": "bold"})
 
 
-# In[6]:
+# <font size="5">Delivery Probability by Drop Policy</font>
+
+# In[98]:
 
 
 # Filter for RUN ID
@@ -114,7 +116,43 @@ current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssi
  'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
  'sourceSegregationBucketPolicy']))]
 
-current_df = current_df.loc[(current_df["DropPolicy"]).isin(["dropYoungestPolicy"])]
+"""
+sns.boxplot(x="RoutingAlgorithm", y="delivery_prob",
+            hue="DropPolicy",
+            data=current_df,                   
+           )
+"""
+
+stripplot = sns.stripplot(x="RoutingAlgorithm", y="delivery_prob",
+            hue="DropPolicy",
+            data=current_df,
+            dodge=True            
+            )
+
+
+sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+
+
+# <font size="5">Delivery Probability for distinct Drop Policy</font>
+
+# In[96]:
+
+
+# Filter for RUN ID
+current_df = scenarioQ
+
+#Filter for Routing Algorithm
+current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
+                                                                 'SprayAndWaitRouter-7t','ProphetRouter', 'ProphetV2Router'])] 
+#Filter for Bucket Policy
+current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
+ 'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
+ 'prioritizeLowTTLBucketPolicy','randomBucketPolicy',
+ 'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
+ 'sourceSegregationBucketPolicy']))]
+
+#['dropFrontPolicy' 'dropLargestPolicy' 'dropLastPolicy' 'dropOldestPolicy','dropYoungestPolicy']
+current_df = current_df.loc[(current_df["DropPolicy"]).isin(["dropLargestPolicy"])]
 
 
 
@@ -126,35 +164,9 @@ boxplot.set_xticklabels(boxplot.get_xticklabels(),rotation=30)
 sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 
-# <font size="5">Delivery Probability by Drop Policy</font>
+# <font size="5">Delivery Probability by Drop + Bucket Combination</font>
 
-# In[7]:
-
-
-# Filter for RUN ID
-current_df = scenarioQ
-
-#Filter for Routing Algorithm
-current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
-                                                                 'SprayAndWaitRouter-7t','ProphetRouter', 'ProphetV2Router'])] 
-#Filter for Bucket Policy
-current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
- 'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
- 'prioritizeLowTTLBucketPolicy','randomBucketPolicy',
- 'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
- 'sourceSegregationBucketPolicy']))]
-
-
-
-boxplot = sns.boxplot(x="RoutingAlgorithm", y="delivery_prob",
-            hue="DropPolicy",
-            data=current_df )
-
-boxplot.set_xticklabels(boxplot.get_xticklabels(),rotation=30)
-sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
-
-
-# In[8]:
+# In[90]:
 
 
 # Filter for RUN ID
@@ -181,14 +193,16 @@ stripplot = sns.stripplot(x="RoutingAlgorithm", y="delivery_prob",
 sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
 
 
-# In[9]:
+# <font size="5">Delivery Probability for distinct Router AND Drop + Bucket Combination</font>
+
+# In[102]:
 
 
 # Filter for RUN ID
 current_df = scenarioQ
 
 #Filter for Routing Algorithm
-current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['Prophet'])] 
+current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['ProphetRouter'])] 
 #Filter for Bucket Policy
 current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
  'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
@@ -201,13 +215,16 @@ current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssi
 stripplot = sns.stripplot(x="DropPolicy", y="delivery_prob",
             hue="BucketPolicy",
             data=current_df, dodge=True, linewidth=0.5)
-stripplot.set_xticklabels(stripplot.get_xticklabels(),rotation=30)
-sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+try:
+    stripplot.set_xticklabels(stripplot.get_xticklabels(),rotation=30)
+    sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+except:
+    pass
 
 
 # <font size="5">Latency Median</font>
 
-# In[ ]:
+# In[103]:
 
 
 # Filter for RUN ID
@@ -234,7 +251,7 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Overhead Ratio</font>
 
-# In[ ]:
+# In[104]:
 
 
 # Filter for RUN ID
@@ -264,7 +281,7 @@ sns.move_legend(boxplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Delivery Probability</font>
 
-# In[ ]:
+# In[105]:
 
 
 for i in range(len(df_runs)):
