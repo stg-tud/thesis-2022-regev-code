@@ -1,12 +1,13 @@
-Scenario.name = %%Group.router%%_runc/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%ExternalMovement.file%%
+Scenario.name = %%Group.router%%_scenarioEPIDEMIC-A/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%ExternalMovement.file%%
 Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
-ExternalMovement.file =[thesis-2022-regev-code/movement_models/RW1_100_24h.one;thesis-2022-regev-code/movement_models/RW2_100_24h.one;thesis-2022-regev-code/movement_models/RW3_100_24h.one;thesis-2022-regev-code/movement_models/RW4_100_24h.one;thesis-2022-regev-code/movement_models/RW5_100_24h.one;thesis-2022-regev-code/movement_models/MG1_100_24h.one;thesis-2022-regev-code/movement_models/MG2_100_24h.one;thesis-2022-regev-code/movement_models/MG3_100_24h.one;thesis-2022-regev-code/movement_models/MG4_100_24h.one;thesis-2022-regev-code/movement_models/MG5_100_24h.one]
-Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; senderBasedBucketAssignmentPolicy;sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
-Group.SendingPolicy = RandomsendPolicy
+ExternalMovement.file =[thesis-2022-regev-code/movement_models/RW1_100_24h.one;thesis-2022-regev-code/movement_models/RW2_100_24h.one;thesis-2022-regev-code/movement_models/RW3_100_24h.one;thesis-2022-regev-code/movement_models/RW4_100_24h.one;thesis-2022-regev-code/movement_models/RW5_100_24h.one;thesis-2022-regev-code/movement_models/MG1_100_24h.one;thesis-2022-regev-code/movement_models/MG2_100_24h.one;thesis-2022-regev-code/movement_models/MG3_100_24h.one;thesis-2022-regev-code/movement_models/MG4_100_24h.one]
+Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
+Group.SendingPolicy = FIFOsendPolicy
+Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;dropOldestPolicy;dropYoungestPolicy]
 
 Scenario.simulateConnections = true
-Scenario.updateInterval = 5
+Scenario.updateInterval = 0.1
 Scenario.endTime = 43000
 
 
@@ -18,7 +19,7 @@ wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
 # Common settings for all groups
-Group.bufferSize = 150M
+Group.bufferSize = 1000M
 Group.waitTime = 0, 120
 # All nodes have the bluetooth interface
 Group.nrofInterfaces = 1
@@ -26,7 +27,7 @@ Group.interface1 = wifiInterface
 # Walking speeds
 Group.speed = 0.5, 1.5
 # Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+Group.msgTtl = 3000
 #Group.msgTtl = 1440
 
 Group.nrofHosts = 100
@@ -40,7 +41,7 @@ Events.nrof = 3
 Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events1.interval = 25,35
+Events1.interval = 5,35
 # Message sizes (1kb - 300kb)
 Events1.size = 100,1k
 # range of message source/destination addresses
@@ -52,26 +53,26 @@ Events1.prefix = M
 Events2.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events2.interval = 25,35
+Events2.interval = 5,35
 # Message sizes (1kb - 300kb)
 Events2.size = 100,1k
 # range of message source/destination addresses
 Events2.hosts = 33,66
 Events2.tohosts = 33,66
 # Message ID prefix
-Events2.prefix = M
+Events2.prefix = N
 
 Events3.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events3.interval = 25,35
+Events3.interval = 5,35
 # Message sizes (1kb - 300kb)
 Events3.size = 100,1k
 # range of message source/destination addresses
 Events3.hosts = 66,100
 Events3.tohosts = 66,100
 # Message ID prefix
-Events3.prefix = M
+Events3.prefix = O
 
 ## Movement model settings
 # seed for movement models' pseudo random number generator (default = 0)
