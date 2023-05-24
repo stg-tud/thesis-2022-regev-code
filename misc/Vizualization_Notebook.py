@@ -74,7 +74,9 @@ print(df_runs)
 # In[5]:
 
 
-sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
+#sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
+#sns.set_theme(style="ticks" , palette=sns.color_palette("tab10"))
+sns.set_theme(style="ticks" , palette=sns.color_palette("bright"))
 
 
 # # 
@@ -83,7 +85,7 @@ sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
 # <font size="5">Delivery Probability All</font>
 # 
 
-# In[21]:
+# In[6]:
 
 
 for i in range(len(df_runs)):
@@ -195,7 +197,7 @@ sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
 
 # <font size="5">Delivery Probability for distinct Router AND Drop + Bucket Combination</font>
 
-# In[20]:
+# In[10]:
 
 
 # Filter for RUN ID
