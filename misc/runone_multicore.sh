@@ -20,10 +20,15 @@ python3 thesis-2022-regev-code/misc/settings_generator.py --input "$1" --output 
 max_processes=4
 running_processes=0
 
+current_file=0
+total_files=$(ls "$confdir" | wc -l)
+
 for file in "$confdir"/*; do
   if [ -f "$file" ]; then
     for i in {0..3}; do
       if ! pgrep -a one.sh | grep -q numactl.*-C.*$i; then
+        ((current_file++))
+        echo "Started config $current_file/$total_files"
         # run the-one on specific core
         numactl --physcpubind=$i ./thesis-2022-regev-code/one.sh -b 1 "$file" &
         ((running_processes++))
