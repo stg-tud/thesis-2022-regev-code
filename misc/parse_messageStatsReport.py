@@ -40,7 +40,7 @@ for routing_dir in os.listdir(args.input):
             drop_policy=bucket_dir.split("-")[2]
             movement_model = MS_File.split(".")[0]
             count_nodes = MS_File.split("_")[1]
-            run_index = routing_dir.split("_")[1]
+            run_index = routing_dir.split("_")[1].replace("-","_")
             routing_algo = routing_dir.split("_")[0]
             try:
                 values = extract_values_from_file(os.path.join(os.getcwd(),args.input,routing_dir,bucket_dir,"movement_models",MS_File))
