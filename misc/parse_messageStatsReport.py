@@ -8,6 +8,11 @@ parser.add_argument('--input', type=str, help='the path to the directory')
 parser.add_argument('--output', type=str, help='the path to the directory where the result .csv is saved')
 args = parser.parse_args()
 
+if(args.output.endswith(".csv")):
+    output_path = os.path.join(os.getcwd(),args.output)
+else:
+    output_path = os.path.join(os.getcwd(),args.output,"messageStatsReports.csv")
+
 pattern="*MessageStatsReport.txt"
 
 def extract_values_from_file(file_path):
@@ -48,8 +53,8 @@ for routing_dir in os.listdir(args.input):
             except:
                 print("Failed for %s" % os.path.join(os.getcwd(),args.input,routing_dir,bucket_dir,"movement_models",MS_File))
 
-with open(os.path.join(os.getcwd(),args.output,"messageStatsReports.csv"), 'w+', newline="\n") as f:
+with open(output_path, 'w+', newline="\n") as f:
     writer = csv.writer(f)
     for row in output:
         writer.writerow(row)
-    print("Created outputfile %s" % os.path.join(os.getcwd(),args.output,"messageStatsReports.csv"))
+    print("Created outputfile %s" % output_path)
