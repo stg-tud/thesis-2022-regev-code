@@ -4,8 +4,8 @@ import argparse
 import json
 
 parser = argparse.ArgumentParser(description='Parse selected .txt files in a directory.')
-parser.add_argument('--input', type=str, help='the path to the directory')
-parser.add_argument('--output', type=str, help='the path to the directory where the result .json is saved')
+parser.add_argument('--input', type=str, required=True, help='the path to the directory')
+parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .json is saved')
 args = parser.parse_args()
 if(args.output.endswith(".json")):
     output_path = os.path.join(os.getcwd(),args.output)
@@ -28,7 +28,8 @@ def parse_delivery_messages(path):
     return contact_counts
 
 def write_file(res):
-    js = json.dumps(res)
+    tmp = {k: v for k, v in sorted(res.items(), key=lambda item: item[1], reverse=True)}
+    js = json.dumps(tmp)
     with open(output_path, "w+") as outfile:
         outfile.write(js)
     print("Written output to: %s" % output_path)

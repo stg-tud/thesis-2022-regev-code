@@ -4,8 +4,8 @@ import argparse
 import fnmatch
 
 parser = argparse.ArgumentParser(description='Parse selected .txt files in a directory.')
-parser.add_argument('--input', type=str, help='the path to the directory')
-parser.add_argument('--output', type=str, help='the path to the directory where the result .csv is saved')
+parser.add_argument('--input', type=str, required=True, help='the path to the directory')
+parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .csv is saved')
 args = parser.parse_args()
 
 if(args.output.endswith(".csv")):
