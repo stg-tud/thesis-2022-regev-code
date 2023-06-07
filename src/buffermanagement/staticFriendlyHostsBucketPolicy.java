@@ -3,6 +3,8 @@ package buffermanagement;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import core.DTNHost;
 import core.Message;
@@ -13,6 +15,7 @@ import core.Settings;
 
 public class staticFriendlyHostsBucketPolicy extends BucketAssignmentPolicy {
     static HashMap<String,Integer> contact_policies;
+    static int encounter_threshold = 999;
     public staticFriendlyHostsBucketPolicy(Settings s) throws IOException {
         super(s);
         this.BucketCount = 3;
@@ -26,6 +29,7 @@ public class staticFriendlyHostsBucketPolicy extends BucketAssignmentPolicy {
                     String[] vals = line.split(",");
                     contact_policies.put(vals[0], Integer.parseInt(vals[1]));
                 }
+                encounter_threshold = Collections.max(contact_policies.values()) / 2;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,16 +49,12 @@ public class staticFriendlyHostsBucketPolicy extends BucketAssignmentPolicy {
         if(m.getFrom().equals(currentHost)){
             return 0;
         }
-        else if(currentHost.getKnownHosts().contains(m.getFrom())){
+        else if(encounters >= encounter_threshold){
             return 1;
         }
         else{
             return 2;
         }
-    }
-
-    public void readContactPolicy(String cP){
-
     }
     
 }
