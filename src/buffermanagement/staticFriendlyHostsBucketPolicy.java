@@ -1,18 +1,9 @@
 package buffermanagement;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Map;
-
-
-import java.io.StringReader;
-
 import core.DTNHost;
 import core.Message;
 import core.Settings;
@@ -39,14 +30,18 @@ public class staticFriendlyHostsBucketPolicy extends BucketAssignmentPolicy {
                 e.printStackTrace();
             }
     
-            for (Map.Entry<String, Integer> entry : contact_policies.entrySet()) {
-                System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-            }
         }       
     }
 
     @Override
     public Integer assignBucket(Message m, DTNHost currentHost, Boolean receivedMessage) {
+        int encounters = 0;
+        if(contact_policies != null && contact_policies.containsKey(String.format("%s<->%s", m.getFrom(), currentHost.toString()))){
+            encounters = contact_policies.get(String.format("%s<->%s", m.getFrom(), currentHost.toString()));
+        }
+        else if(contact_policies != null && contact_policies.containsKey(String.format("%s<->%s",currentHost.toString() ,m.getFrom()))){
+            encounters = contact_policies.get(String.format("%s<->%s",currentHost.toString(), m.getFrom()));
+        }
         if(m.getFrom().equals(currentHost)){
             return 0;
         }
