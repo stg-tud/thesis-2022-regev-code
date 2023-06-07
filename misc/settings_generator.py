@@ -31,7 +31,8 @@ def generate_file(values, rA, bP, dP, sP, mM):
         elif k == "Group.BucketPolicy":
             conf += "%s = %s\n" % (k,bP)
             if bP == "staticFriendlyHostsBucketPolicy":
-                conf += "%s = %s\n" % ("Group.contactPolicy",str(os.path.join(mM.split("/")[:-1],"cp_" + mM.split("/")[-1].replace(".one",".csv"))))
+                cp_path = str.join(mM.split("/")[:-1]).replace("movement_models","contact_policies") + "cp_" + mM.split("/")[-1].replace(".one",".csv")
+                conf += "%s = %s\n" % ("Group.contactPolicy",cp_path)
         elif k == "Group.DropPolicy":
             conf += "%s = %s\n" % (k,dP)
         elif k == "Group.SendingPolicy":
