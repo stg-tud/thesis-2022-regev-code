@@ -5,12 +5,12 @@ import json
 
 parser = argparse.ArgumentParser(description='Parse selected .txt files in a directory.')
 parser.add_argument('--input', type=str, required=True, help='the path to the directory')
-parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .json is saved')
+parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .csv is saved')
 args = parser.parse_args()
-if(args.output.endswith(".json")):
+if(args.output.endswith(".csv")):
     output_path = os.path.join(os.getcwd(),args.output)
 else:
-    output_path = os.path.join(os.getcwd(),args.output,"deliveredMessagesReports.json")
+    output_path = os.path.join(os.getcwd(),args.output,"cp_" + os.path.basename(args.input).split(".one")[0] + ".csv")
 
 
 
@@ -20,7 +20,10 @@ def parse_delivery_messages(path):
         reader = csv.reader(csvfile, delimiter=' ')
         next(reader)
         for row in reader:
-            delivery = "%s->%s" % (row[5],row[6])
+            if row[5] <= row[6]:
+                delivery = "%s<->%s" % (row[5],row[6])
+            else:
+                delivery = "%s<->%s" % (row[6],row[5])
             if delivery in contact_counts:
                 contact_counts[delivery] += 1
             else:
@@ -31,7 +34,9 @@ def write_file(res):
     tmp = {k: v for k, v in sorted(res.items(), key=lambda item: item[1], reverse=True)}
     js = json.dumps(tmp)
     with open(output_path, "w+") as outfile:
-        outfile.write(js)
+        outfile.write("pair,contact_times")
+        for key,val in tmp.items():
+            outfile.write("\n%s,%s" % (key,val))
     print("Written output to: %s" % output_path)
 
 contacts = parse_delivery_messages(args.input)
