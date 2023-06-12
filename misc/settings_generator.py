@@ -14,6 +14,8 @@ def extract_values_from_file(file_path):
 
     values = {}
     for line in lines:
+        if line.startswith("#"):
+            continue
         if '=' in line:
             key, value = line.strip().split('=')
             values[key.strip()] = value.strip()
@@ -28,6 +30,9 @@ def generate_file(values, rA, bP, dP, sP, mM):
             conf += "%s = %s\n" % (k,rA)
         elif k == "Group.BucketPolicy":
             conf += "%s = %s\n" % (k,bP)
+            if bP == "staticFriendlyHostsBucketPolicy":
+                cp_path = "/".join(mM.split("/")[:-1]).replace("movement_models","contact_policies") + "/cp_" + mM.split("/")[-1].replace(".one",".csv")
+                conf += "%s = %s\n" % ("Group.contactPolicy",cp_path)
         elif k == "Group.DropPolicy":
             conf += "%s = %s\n" % (k,dP)
         elif k == "Group.SendingPolicy":
