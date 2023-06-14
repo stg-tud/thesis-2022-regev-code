@@ -7,9 +7,9 @@ import core.Settings;
 import routing.ActiveRouter;
 
 
-public class dropFrontPolicy extends dropPolicy{
-// Drop Front (DF) => Drops the oldest message regarding creation time
-    public dropFrontPolicy(Settings s) {
+public class dropHeadPolicy extends dropPolicy{
+// Drop Head (DH) => Drops the oldest message regarding receive time
+    public dropHeadPolicy(Settings s) {
         super(s);
     }
 
@@ -26,7 +26,7 @@ public class dropFrontPolicy extends dropPolicy{
 			if (oldest == null ) {
 				oldest = m;
 			}
-			else if (oldest.getCreationTime() > m.getCreationTime()) {
+			else if (oldest.getReceiveTime() > m.getReceiveTime()) {
 				oldest = m;
 			}
 		}
