@@ -25,13 +25,16 @@ def extract_values_from_file(file_path):
 def generate_file(values, rA, bP, dP, sP, mM):
     conf = ""
     filename = "tmp-conf" + str(random.randint(1000000,999999999)) + ".txt"
+    scenarioID = "-1"
     for k,i in values.items():
+        if k == "Group.ScenarioID":
+            scenarioID = i
         if k == "Group.router":
             conf += "%s = %s\n" % (k,rA)
         elif k == "Group.BucketPolicy":
             conf += "%s = %s\n" % (k,bP)
             if bP == "staticFriendlyHostsBucketPolicy":
-                cp_path = "/".join(mM.split("/")[:-1]).replace("movement_models","contact_policies") + "/cp_" + mM.split("/")[-1].replace(".one",".csv")
+                cp_path = "/".join(mM.split("/")[:-1]).replace("movement_models","contact_policies") +"/%s/cp_" % (scenarioID) + mM.split("/")[-1].replace(".one",".csv")
                 conf += "%s = %s\n" % ("Group.contactPolicy",cp_path)
         elif k == "Group.DropPolicy":
             conf += "%s = %s\n" % (k,dP)
