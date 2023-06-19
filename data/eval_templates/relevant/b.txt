@@ -14,7 +14,11 @@ Scenario.endTime = 43000
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
+<<<<<<< HEAD:data/eval_templates/relevant/b.txt
 wifiInterface.transmitSpeed = 6570k
+=======
+wifiInterface.transmitSpeed = 16570k
+>>>>>>> main:data/eval_templates/FIFO/i-epi.txt
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
