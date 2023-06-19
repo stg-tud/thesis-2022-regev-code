@@ -1,4 +1,4 @@
-Scenario.name = %%Group.router%%_scenarioEPIDEMIC-D/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%ExternalMovement.file%%
+Scenario.name = %%Group.router%%_scenarioEPIDEMIC-D-medium/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%ExternalMovement.file%%
 Group.ScenarioID = 3
 Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
