@@ -4,6 +4,7 @@ import core.DTNHost;
 import core.Message;
 import core.Settings;
 
+//(dynamic friendlyHost policy)
 public class friendlyHostsBucketPolicy extends BucketAssignmentPolicy {
 
     public friendlyHostsBucketPolicy(Settings s) {
