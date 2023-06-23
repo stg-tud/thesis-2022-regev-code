@@ -2,17 +2,13 @@ import os
 import csv
 import argparse
 import json
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description='Parse selected .txt files in a directory.')
-parser.add_argument('--input', type=str, required=True, help='the path to the directory')
+parser.add_argument('--input', type=str, required=True, help='the path to the directory or file')
 parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .csv is saved')
+parser.add_argument('--recursive', action=argparse.BooleanOptionalAction, help='Find files recursively and process them')
 args = parser.parse_args()
-if(args.output.endswith(".csv")):
-    output_path = os.path.join(os.getcwd(),args.output)
-else:
-    output_path = os.path.join(os.getcwd(),args.output,"cp_" + os.path.basename(args.input).split(".one")[0] + ".csv")
-
-
 
 def parse_delivery_messages(path):
     contact_counts = {}
@@ -30,14 +26,32 @@ def parse_delivery_messages(path):
                 contact_counts[delivery] = 1
     return contact_counts
 
-def write_file(res):
+def write_file(res , output):
     tmp = {k: v for k, v in sorted(res.items(), key=lambda item: item[1], reverse=True)}
     js = json.dumps(tmp)
-    with open(output_path, "w+") as outfile:
+    with open(output, "w+") as outfile:
         outfile.write("pair,contact_times")
         for key,val in tmp.items():
             outfile.write("\n%s,%s" % (key,val))
-    print("Written output to: %s" % output_path)
+    print("Written output to: %s" % output)
 
-contacts = parse_delivery_messages(args.input)
-write_file(contacts)
+
+
+if(args.recursive):
+    if not os.path.isdir(os.path.join(os.getcwd(),args.input)) or not os.path.isdir(os.path.join(os.getcwd(),args.output)):
+        raise ValueError("Provide input and output directories for recursive actions")
+    if not os.path.exists(os.path.join(os.getcwd(),args.output,"output_policies")):
+        os.mkdir(os.path.join(os.getcwd(),args.output,"output_policies"))
+    output_path = os.path.join(os.getcwd(),args.output)
+    for path in Path(args.input).rglob('*_CreatedMessagesReport.txt'):
+        contacts = parse_delivery_messages(path)
+        write_file(contacts, output_path)
+else:
+    if not os.path.isfile(os.path.join(os.getcwd(),args.input)):
+        raise ValueError("Provide input file, not directory")
+    if(args.output.endswith(".csv")):
+        output_path = os.path.join(os.getcwd(),args.output)
+    else:
+        output_path = os.path.join(os.getcwd(),args.output,"cp_" + os.path.basename(args.input).split(".one")[0] + ".csv")
+    contacts = parse_delivery_messages(args.input)
+    write_file(contacts, output_path)
