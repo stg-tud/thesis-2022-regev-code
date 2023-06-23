@@ -42,10 +42,10 @@ if(args.recursive):
         raise ValueError("Provide input and output directories for recursive actions")
     if not os.path.exists(os.path.join(os.getcwd(),args.output,"output_policies")):
         os.mkdir(os.path.join(os.getcwd(),args.output,"output_policies"))
-    output_path = os.path.join(os.getcwd(),args.output)
+    output_path = os.path.join(os.getcwd(),args.output,"output_policies")
     for path in Path(args.input).rglob('*_CreatedMessagesReport.txt'):
         contacts = parse_delivery_messages(path)
-        write_file(contacts, output_path)
+        write_file(contacts, os.path.join(output_path,"cp_" + os.path.basename(path).split(".one")[0] + ".csv"))
 else:
     if not os.path.isfile(os.path.join(os.getcwd(),args.input)):
         raise ValueError("Provide input file, not directory")
