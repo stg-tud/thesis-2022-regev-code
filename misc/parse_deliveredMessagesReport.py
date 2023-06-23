@@ -4,7 +4,7 @@ import argparse
 import json
 
 parser = argparse.ArgumentParser(description='Parse selected .txt files in a directory.')
-parser.add_argument('--input', type=str, required=True, help='the path to the directory')
+parser.add_argument('--input', type=str, required=True, help='the path to the file')
 parser.add_argument('--output', type=str, required=True, help='the path to the directory where the result .csv is saved')
 args = parser.parse_args()
 if(args.output.endswith(".csv")):
