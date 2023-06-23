@@ -82,4 +82,4 @@ Report.warmup = 0
 Report.reportDir = reports/
 # Report classes to load
 Report.report1 = MessageStatsReport
-Report.report2 = BufferOccupancyReportt
+Report.report2 = BufferOccupancyReport
