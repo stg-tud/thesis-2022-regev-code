@@ -14,10 +14,10 @@ public class prioritizeLowTTLBucketPolicy extends BucketAssignmentPolicy{
     @Override
     public Integer assignBucket(Message m, DTNHost currentHost, Boolean receivedMessage) {
         int messageTTL = m.getTtl();
-        if(messageTTL < 100){
+        if(messageTTL < 90){
             return 0;
         }
-        else if(messageTTL < 200){
+        else if(messageTTL < 240){
             return 1;
         }
         else{
