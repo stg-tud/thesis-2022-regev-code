@@ -17,7 +17,7 @@ public class prioritizeLowTTLBucketPolicy extends BucketAssignmentPolicy{
         if(messageTTL < 90){
             return 0;
         }
-        else if(messageTTL < 180){
+        else if(messageTTL < 240){
             return 1;
         }
         else{
