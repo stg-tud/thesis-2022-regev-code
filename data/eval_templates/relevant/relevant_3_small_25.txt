@@ -1,40 +1,37 @@
-Scenario.name = %%Group.router%%_scenarioEPIDEMIC-B/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%ExternalMovement.file%%
+Scenario.name = %%Group.router%%_scenario%%Group.ScenarioID%%_small/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%Group.bufferSize%%-%%ExternalMovement.file%%
+Group.ScenarioID = 3
 Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
-ExternalMovement.file =[thesis-2022-regev-code/movement_models/RW1_100_24h.one;thesis-2022-regev-code/movement_models/RW2_100_24h.one;thesis-2022-regev-code/movement_models/RW3_100_24h.one;thesis-2022-regev-code/movement_models/RW4_100_24h.one;thesis-2022-regev-code/movement_models/RW5_100_24h.one;thesis-2022-regev-code/movement_models/MG1_100_24h.one;thesis-2022-regev-code/movement_models/MG2_100_24h.one;thesis-2022-regev-code/movement_models/MG3_100_24h.one;thesis-2022-regev-code/movement_models/MG4_100_24h.one]
-Group.BucketPolicy = [destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
+ExternalMovement.file =[thesis-2022-regev-code/movement_models/S_RW1_25_12h.one;thesis-2022-regev-code/movement_models/S_RW2_25_12h.one;thesis-2022-regev-code/movement_models/S_RW3_25_12h.one;thesis-2022-regev-code/movement_models/S_RW4_25_12h.one;thesis-2022-regev-code/movement_models/S_RW5_25_12h.one]
+Group.BucketPolicy = [staticFriendlyHostsBucketPolicy; destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
 Group.SendingPolicy = FIFOsendPolicy
-Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;dropOldestPolicy;dropYoungestPolicy]
+Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy]
 
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
-Scenario.endTime = 43000
+Scenario.endTime = 43200
 
 
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
-<<<<<<< HEAD:data/eval_templates/relevant/b.txt
 wifiInterface.transmitSpeed = 6570k
-=======
-wifiInterface.transmitSpeed = 16570k
->>>>>>> main:data/eval_templates/FIFO/i-epi.txt
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
 # Common settings for all groups
-Group.bufferSize = 100M
+Group.bufferSize = [256k;1M]
 Group.waitTime = 0, 120
 # All nodes have the bluetooth interface
 Group.nrofInterfaces = 1
 Group.interface1 = wifiInterface
 # Walking speeds
 Group.speed = 0.5, 1.5
-# Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 3000
-#Group.msgTtl = 1440
+# Message TTL of 360 minutes (6 hours)
+Group.msgTtl = 360
 
-Group.nrofHosts = 100
+
+Group.nrofHosts = 25
 
 Group.groupID = device
 
@@ -46,11 +43,10 @@ Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
 Events1.interval = 5,35
-# Message sizes (1kb - 300kb)
-Events1.size = 100,1k
+Events1.size = 64,256
 # range of message source/destination addresses
-Events1.hosts = 0,33
-Events1.tohosts = 0,33
+Events1.hosts = 0,8
+Events1.tohosts = 0,8
 # Message ID prefix
 Events1.prefix = M
 
@@ -58,11 +54,10 @@ Events2.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
 Events2.interval = 5,35
-# Message sizes (1kb - 300kb)
-Events2.size = 100,1k
+Events2.size = 64,256
 # range of message source/destination addresses
-Events2.hosts = 33,66
-Events2.tohosts = 33,66
+Events2.hosts = 8,16
+Events2.tohosts = 8,16
 # Message ID prefix
 Events2.prefix = N
 
@@ -70,11 +65,10 @@ Events3.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
 Events3.interval = 5,35
-# Message sizes (1kb - 300kb)
-Events3.size = 100,1k
+Events3.size = 64,256
 # range of message source/destination addresses
-Events3.hosts = 66,100
-Events3.tohosts = 66,100
+Events3.hosts = 16,25
+Events3.tohosts = 16,25
 # Message ID prefix
 Events3.prefix = O
 
@@ -82,10 +76,11 @@ Events3.prefix = O
 # seed for movement models' pseudo random number generator (default = 0)
 MovementModel.rngSeed = 1
 # World's size for Movement Models without implicit size (width, height; meters)
-MovementModel.worldSize = 4500, 3400
+MovementModel.worldSize = 3500, 3500
 
-Report.nrofReports = 1
+Report.nrofReports = 2
 Report.warmup = 0
 Report.reportDir = reports/
 # Report classes to load
 Report.report1 = MessageStatsReport
+Report.report2 = BufferOccupancyReport
