@@ -31,7 +31,7 @@ def extract_values_from_file(file_path):
 
     return values
 
-output = [["sep=,"],["RoutingAlgorithm","Scenario","MovementModel","BucketPolicy","SendPolicy","DropPolicy","Nodes","sim_time","created","started","relayed","aborted","dropped","removed","delivery_prob","response_prob","overhead_ratio","latency_avg","latency_med","hopcount_avg","hopcount_med","buffertime_avg","buffertime_med","rtt_avg","rtt_med"]]
+output = [["sep=,"],["SimulationID","RoutingAlgorithm","Scenario","MovementModel","BucketPolicy","SendPolicy","DropPolicy","Nodes","BufferSize","sim_time","created","started","relayed","aborted","dropped","removed","delivery_prob","response_prob","overhead_ratio","latency_avg","latency_med","hopcount_avg","hopcount_med","buffertime_avg","buffertime_med","rtt_avg","rtt_med"]]
 
 for routing_dir in os.listdir(args.input):
     for bucket_dir in os.listdir(os.path.join(args.input,routing_dir)):
@@ -43,13 +43,15 @@ for routing_dir in os.listdir(args.input):
             bucket_policy=bucket_dir.split("-")[0]
             send_policy=bucket_dir.split("-")[1]
             drop_policy=bucket_dir.split("-")[2]
+            buffer_size=bucket_dir.split("-")[3]
             movement_model = MS_File.split(".")[0]
-            count_nodes = MS_File.split("_")[1]
+            count_nodes = MS_File.split("_")[2]
             run_index = routing_dir.split("_")[1].replace("-","_")
             routing_algo = routing_dir.split("_")[0]
+            simulation_id = "_".join(routing_dir.split("_")[1:])
             try:
                 values = extract_values_from_file(os.path.join(os.getcwd(),args.input,routing_dir,bucket_dir,"movement_models",MS_File))
-                output.append([routing_algo,run_index,movement_model,bucket_policy,send_policy,drop_policy,count_nodes,values["sim_time"],values["created"],values["started"],values["relayed"],values["aborted"],values["dropped"],values["removed"],values["delivery_prob"],values["response_prob"],values["overhead_ratio"],values["latency_avg"],values["latency_med"],values["hopcount_avg"],values["hopcount_med"],values["buffertime_avg"],values["buffertime_med"],values["rtt_avg"],values["rtt_med"]])
+                output.append([simulation_id,routing_algo,run_index,movement_model,bucket_policy,send_policy,drop_policy,count_nodes,buffer_size,values["sim_time"],values["created"],values["started"],values["relayed"],values["aborted"],values["dropped"],values["removed"],values["delivery_prob"],values["response_prob"],values["overhead_ratio"],values["latency_avg"],values["latency_med"],values["hopcount_avg"],values["hopcount_med"],values["buffertime_avg"],values["buffertime_med"],values["rtt_avg"],values["rtt_med"]])
             except:
                 print("Failed for %s" % os.path.join(os.getcwd(),args.input,routing_dir,bucket_dir,"movement_models",MS_File))
 

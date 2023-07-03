@@ -22,7 +22,7 @@ def extract_values_from_file(file_path):
 
     return values
 
-def generate_file(values, rA, bP, dP, sP, mM):
+def generate_file(values, rA, bP, dP, sP, mM, bS):
     conf = ""
     filename = "tmp-conf" + str(random.randint(1000000,999999999)) + ".txt"
     scenarioID = "-1"
@@ -42,6 +42,8 @@ def generate_file(values, rA, bP, dP, sP, mM):
             conf += "%s = %s\n" % (k,sP)
         elif k == "ExternalMovement.file":
             conf += "%s = %s\n" % (k,mM)
+        elif k == "Group.bufferSize":
+            conf += "%s = %s\n" % (k,bS)
         else:
             conf += "%s = %s\n" % (k,i)
     with open(os.path.join(args.output,filename), 'w+') as out:
@@ -55,13 +57,15 @@ for settingsFile in os.listdir(args.input):
     dropPolicies = values["Group.DropPolicy"].replace("[","").replace("]","").split(";")
     sendingPolicies =  values["Group.SendingPolicy"].replace("[","").replace("]","").split(";")
     movementModels = values["ExternalMovement.file"].replace("[","").replace("]","").split(";")
+    bufferSizes = values["Group.bufferSize"].replace("[","").replace("]","").split(";")
     
     for routingAlgo in routingAlgorithms:
         for bucketPolicy in bucketPolicies:
             for dropPolicy in dropPolicies:
                 for sendingPolicy in sendingPolicies:
                     for movementModel in movementModels:
-                        generate_file(values,routingAlgo,bucketPolicy,dropPolicy,sendingPolicy,movementModel)
+                        for bufferSize in bufferSizes:
+                            generate_file(values,routingAlgo,bucketPolicy,dropPolicy,sendingPolicy,movementModel,bufferSize)
 print("Sucessfully generated setting files!")
 
 
