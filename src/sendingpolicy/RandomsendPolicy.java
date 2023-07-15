@@ -51,10 +51,6 @@ public class RandomsendPolicy extends sendPolicy {
                 .sorted()
                 .forEach(bucket -> sortedMessages.addAll(bucketedMessages.get(bucket)));
     
-        for (Message item : sortedMessages) {
-            System.out.print(item.getProperty("Bucket") + " ");
-        }
-        System.out.println();
         return sortedMessages;
     }
     
