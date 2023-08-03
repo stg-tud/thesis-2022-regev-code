@@ -42,7 +42,7 @@ Events.nrof = 3
 Events1.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events1.interval = 10,20
+Events1.interval = 5,15
 Events1.size = 64,256
 # range of message source/destination addresses
 Events1.hosts = 0,8
@@ -53,7 +53,7 @@ Events1.prefix = M
 Events2.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events2.interval = 5,35
+Events2.interval = 5,15
 Events2.size = 64,256
 # range of message source/destination addresses
 Events2.hosts = 8,16
@@ -64,7 +64,7 @@ Events2.prefix = N
 Events3.class = MessageEventGenerator
 # (following settings are specific for the MessageEventGenerator class)
 # Creation interval in seconds (one new message every 25 to 35 seconds)
-Events3.interval = 5,35
+Events3.interval = 5,15
 Events3.size = 64,256
 # range of message source/destination addresses
 Events3.hosts = 16,25
