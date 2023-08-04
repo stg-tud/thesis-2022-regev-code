@@ -4,7 +4,7 @@ Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
 ExternalMovement.file =[thesis-2022-regev-code/movement_models/M_RW1_50_12h.one;thesis-2022-regev-code/movement_models/M_RW2_50_12h.one;thesis-2022-regev-code/movement_models/M_RW3_50_12h.one;thesis-2022-regev-code/movement_models/M_RW4_50_12h.one;thesis-2022-regev-code/movement_models/M_RW5_50_12h.one]
 Group.BucketPolicy = [staticFriendlyHostsBucketPolicy; destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
-Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;CreationtimesendPolicy]
+Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;RandomsendPolicy]
 Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy;mofoPolicy]
 
 Scenario.simulateConnections = true
@@ -15,7 +15,7 @@ Scenario.endTime = 43200
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
-wifiInterface.transmitSpeed = 6570k
+wifiInterface.transmitSpeed = 500k
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
