@@ -4,7 +4,7 @@ Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
 ExternalMovement.file =[thesis-2022-regev-code/movement_models/S_RW1_100_12h.one;thesis-2022-regev-code/movement_models/S_RW2_100_12h.one;thesis-2022-regev-code/movement_models/S_RW3_100_12h.one;thesis-2022-regev-code/movement_models/S_RW4_100_12h.one;thesis-2022-regev-code/movement_models/S_RW5_100_12h.one]
 Group.BucketPolicy = [staticFriendlyHostsBucketPolicy; destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
-Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;CreationtimesendPolicy;LIFOsendPolicy]
+Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;RandomsendPolicy;LIFOsendPolicy]
 Group.DropPolicy = [mofoPolicy;dropRandomPolicy;dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy]
 
 Scenario.simulateConnections = true
