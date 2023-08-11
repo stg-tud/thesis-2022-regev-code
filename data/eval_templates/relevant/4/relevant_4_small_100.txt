@@ -4,8 +4,8 @@ Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
 ExternalMovement.file =[thesis-2022-regev-code/movement_models/S_RW1_100_12h.one;thesis-2022-regev-code/movement_models/S_RW2_100_12h.one;thesis-2022-regev-code/movement_models/S_RW3_100_12h.one;thesis-2022-regev-code/movement_models/S_RW4_100_12h.one;thesis-2022-regev-code/movement_models/S_RW5_100_12h.one]
 Group.BucketPolicy = [staticFriendlyHostsBucketPolicy; destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
-Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;RandomsendPolicy]
-Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy;mofoPolicy]
+Group.SendingPolicy = [LIFOsendPolicy;FIFOsendPolicy;CreationtimesendPolicy;RandomsendPolicy]
+Group.DropPolicy = [dropRandomPolicy;dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy;mofoPolicy]
 
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
@@ -15,12 +15,12 @@ Scenario.endTime = 43200
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
-wifiInterface.transmitSpeed = 3000k
+wifiInterface.transmitSpeed = 500k
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
 # Common settings for all groups
-Group.bufferSize = [256k;1M]
+Group.bufferSize = [256k;1M;10M]
 Group.waitTime = 0, 120
 # All nodes have the bluetooth interface
 Group.nrofInterfaces = 1
