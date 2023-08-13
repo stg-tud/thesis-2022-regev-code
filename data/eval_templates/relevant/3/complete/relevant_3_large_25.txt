@@ -1,11 +1,11 @@
-Scenario.name = %%Group.router%%_scenario%%Group.ScenarioID%%_medium/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%Group.bufferSize%%-%%ExternalMovement.file%%
+Scenario.name = %%Group.router%%_scenario%%Group.ScenarioID%%_large/%%Group.BucketPolicy%%-%%Group.SendingPolicy%%-%%Group.DropPolicy%%-%%Group.bufferSize%%-%%ExternalMovement.file%%
 Group.ScenarioID = 3
 Group.router = [EpidemicRouter]
 Group.movementModel = ExternalMovement
-ExternalMovement.file =[thesis-2022-regev-code/movement_models/M_RW1_25_12h.one;thesis-2022-regev-code/movement_models/M_RW2_25_12h.one;thesis-2022-regev-code/movement_models/M_RW3_25_12h.one;thesis-2022-regev-code/movement_models/M_RW4_25_12h.one;thesis-2022-regev-code/movement_models/M_RW5_25_12h.one]
+ExternalMovement.file =[thesis-2022-regev-code/movement_models/L_RW1_25_12h.one;thesis-2022-regev-code/movement_models/L_RW2_25_12h.one;thesis-2022-regev-code/movement_models/L_RW3_25_12h.one;thesis-2022-regev-code/movement_models/L_RW4_25_12h.one;thesis-2022-regev-code/movement_models/L_RW5_25_12h.one]
 Group.BucketPolicy = [staticFriendlyHostsBucketPolicy; destinationBasedBucketPolicy; forwardCountBucketPolicy;friendlyHostsBucketPolicy;prioritizeLowTTLBucketPolicy; randomBucketPolicy; roundRobinBucketPolicy; sourceSegregationBucketPolicy;DefaultBucketAssignmentPolicy]
-Group.SendingPolicy = LIFOsendPolicy
-Group.DropPolicy = [dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy]
+Group.SendingPolicy = [FIFOsendPolicy;CreationtimesendPolicy;RandomsendPolicy;LIFOsendPolicy]
+Group.DropPolicy = [mofoPolicy;dropRandomPolicy;dropFrontPolicy;dropLargestPolicy;dropLastPolicy;shliPolicy;dropYoungestPolicy;dropHeadPolicy]
 
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.1
@@ -29,6 +29,7 @@ Group.interface1 = wifiInterface
 Group.speed = 0.5, 1.5
 # Message TTL of 360 minutes (6 hours)
 Group.msgTtl = 360
+
 
 Group.nrofHosts = 25
 
@@ -75,7 +76,7 @@ Events3.prefix = O
 # seed for movement models' pseudo random number generator (default = 0)
 MovementModel.rngSeed = 1
 # World's size for Movement Models without implicit size (width, height; meters)
-MovementModel.worldSize = 5000, 5000
+MovementModel.worldSize = 10000, 10000
 
 Report.nrofReports = 2
 Report.warmup = 0

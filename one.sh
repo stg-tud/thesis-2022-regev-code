@@ -7,4 +7,4 @@ else
 fi
 
 echo "Starting the ONE from $SCRIPT_DIR"
-java -Xmx4096M -cp $SCRIPT_DIR/target:$SCRIPT_DIR/lib/ECLA.jar:$SCRIPT_DIR/lib/DTNConsoleConnection.jar:$SCRIPT_DIR core.DTNSim $*
+java -Xmx1024M -cp $SCRIPT_DIR/target:$SCRIPT_DIR/lib/ECLA.jar:$SCRIPT_DIR/lib/DTNConsoleConnection.jar:$SCRIPT_DIR core.DTNSim $*
