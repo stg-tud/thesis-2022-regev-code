@@ -14,7 +14,7 @@ else:
     output_path = os.path.join(os.getcwd(),args.output,"messageStatsReports.csv")
 
 pattern="*MessageStatsReport.txt"
-
+print("Parsing of MessageStatsReports started. This may take a while...")
 def extract_values_from_file(file_path):
     with open(file_path, 'r') as f:
         lines = f.readlines()
