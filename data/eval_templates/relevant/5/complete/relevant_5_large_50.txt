@@ -15,7 +15,7 @@ Scenario.endTime = 43200
 # "WiFi" interface for all nodes
 wifiInterface.type = SimpleBroadcastInterface
 # Transmit speed of 54 Mbps = 6570kBps
-wifiInterface.transmitSpeed = 6570k
+wifiInterface.transmitSpeed = 500k
 wifiInterface.transmitRange = 100
 Scenario.nrofHostGroups = 1
 
