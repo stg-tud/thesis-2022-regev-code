@@ -29,7 +29,7 @@ confdir=$(mktemp -d)
 python3 thesis-2022-regev-code/misc/settings_generator.py --input "$1" --output "$confdir"
 
 # Count of max" processors
-max_processes=$2
+max_processes=$(nproc --all)
 running_processes=0
 
 current_file=0
