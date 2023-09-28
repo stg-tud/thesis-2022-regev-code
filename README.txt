@@ -1,3 +1,42 @@
+The original The ONE Readme follows. Please make sure to read it in advance, if you are unfamiliar with The ONE.
+This is a modificated Version created for the Thesis "Optimization of Buffer Management Strategies for Delay-Tolerant Networks"
+by Roey Regev at the Technical University Darmstadt.
+
+Policies
+========
+This work does support three policy types.
+Bucket Policy: Determines if Bucketing is used and how Buckets are assigned. (/src/buffermanagement)
+Drop Policy: Determines the deletion order of messages within a Buffer/Bucket. (/src/dropmanagement)
+Sending Policy: Determines the sending order within a Buffer/Bucket. (/src/sendingpolicy)
+The configuration can be done with Group.BucketPolicy, Group.SendingPolicy and Group.DropPolicy
+Regard the Thesis for further details.
+
+installation
+============
+0) Pull the project and provide it with adequate permissions (in Linux chmod)
+1) Perform the regular installation of The ONE (installing of java and compiling of file)
+2) Install python3 
+
+Pipeline Execution
+==================
+This version supports a sophisticated pipeline for execution.
+Use one of the runone_multi scripts provided in /misc and copy it to the root folder, which holds this git repository.
+Edit the max_processes parameter according to your processors. If you are using multiple NUMA Cores, the script might need adjsutment.
+The scripts needs a /reports folder in the same hierarchy and takes an arbitrary folder as input, which contains the configuration (aka. settings) files of your simulations.
+You can add an arbitrary amount of configuration files and unlike in the original version, the selected configuration sets don't need to be coprime.
+
+Depending on the amount of simulations, it is recommended to use the script in combination with nohup for remote linux systems.
+
+Auxiliary
+=========
+The project has auxiliary support scripts.
+parse_createdMessageReport.py: Extract node pairs of a createdMessageReport File and writes JSON with their communication frequencies
+parse_deliveredMessageReport.py: Extract node pairs of a deliveredMessageReport File and writes JSON with their communication frequencies
+parse_messageStatsReport.py: interates over a folder recursively and parses all MessageStatsReport Files. Saves the results into a CSV. Format yet required as given by the simulation in /data/eval_templates
+/data/eval_templates: The configuration files as used for the Thesis. They originally had Scenario IDS with (1=RAC,3=RGC,4=HFGC,5=HFAC)
+/contact_policies: Policies used for the staticFriendlyHostsBucketPolicy. Must match the naming scheme of the used movement_model
+/data/movementmodel_param: Parameters used to create external movement models in thesis (using BonnMotion)
+
 The ONE v1.6.0 - Readme
 =======================
 
