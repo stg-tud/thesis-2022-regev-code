@@ -43,7 +43,7 @@ for file in "$confdir"/*; do
         echo "Started config $current_file/$total_files"
         ProgressBar ${current_file} ${total_files}
         # run the-one on specific core
-	numactl -N $i ./thesis-2022-regev-code/one.sh -b 1 "$file" &
+	numactl -N $i ./dtn_repo/one.sh -b 1 "$file" &
         ((running_processes++))
         break
       fi
