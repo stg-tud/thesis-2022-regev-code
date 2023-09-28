@@ -1,0 +1,17 @@
+version: '3'
+services:
+  myapp:
+    image: dtnexec
+    user: root
+    container_name: dtn_container
+    volumes:
+      - ./dtn_data:/home/dtnuser
+    command: bash -c "whoami && rm -Rf /home/dtnuser/* &&git clone https://github.com/stg-tud/thesis-2022-regev-code.git /home/dtnuser/dtn_repo && chmod -R +x /home/dtnuser/dtn_repo && cd /home/dtnuser/dtn_repo && find data/eval_templates/ -type f -name \"*.txt\" -exec sed -i 's/thesis-2022-regev-code/dtn_repo/g' {} + && /home/dtnuser/dtn_repo/compile.sh && mv /home/dtnuser/dtn_repo/misc/runone_multi_docker.sh /home/dtnuser/ && mkdir -p /home/dtnuser/config /home/dtnuser/reports"
+
+  custom_command:
+    image: dtnexec
+    user: root
+    container_name: custom_command_container
+    volumes:
+      - ./dtn_data:/home/dtnuser
+    command: ["/bin/bash"]

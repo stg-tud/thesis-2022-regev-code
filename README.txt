@@ -38,6 +38,23 @@ parse_messageStatsReport.py: interates over a folder recursively and parses all 
 /contact_policies: Policies used for the staticFriendlyHostsBucketPolicy. Must match the naming scheme of the used movement_model
 /data/movementmodel_param: Parameters used to create external movement models in thesis (using BonnMotion)
 
+Setup with docker
+=================
+It is possible to set the project up with Docker.
+0) Install Docker and docker-compose according to their documentation.
+1) copy the files from /misc/docker into your workingspace. You won't need to clone this project, as docker will do it.
+2) run the following commands:
+sudo docker build -t dtnexec .
+sudo docker-compose up
+2a) Now you have a new folder called "dtn_data" which holds this project under "dtn_repo" and auxiliary folders + script.
+3) Create a folder /dtn_data/dtn_repo/movement_models
+3a) Add a folder with your required movement files to /dtn_data/dtn_repo/movement_models
+4) To run The ONE, put your setting/config files into dtn_data/config. Afterwards run the following command from the directory of the docker-compose.yml
+sudo docker-compose run custom_command ./runone_multi_docker.sh ./config
+4a) It will automatically determine the number of processors and run accordingly the simulations. The results are available at /dtn_data/reports
+
+
+
 The ONE v1.6.0 - Readme
 =======================
 
