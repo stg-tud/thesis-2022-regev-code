@@ -17,7 +17,7 @@ import seaborn as sns
 import numpy as np
 import warnings
 
-csv_path=os.path.join(os.getcwd(),"eval_0408.csv")
+csv_path=os.path.join(os.getcwd(),"eval_1408.csv")
 df = pd.read_csv(csv_path, skiprows=[0])
 scenario_names = []
 df_runs = []
@@ -33,18 +33,26 @@ for var_name in list(globals()):
 # In[2]:
 
 
+OUTPUT_BP = os.path.join(os.getcwd(),"output")
+if not os.path.exists(OUTPUT_BP):
+    os.makedirs(OUTPUT_BP)
+
+
+# In[3]:
+
+
 # Suppress all warnings
 warnings.filterwarnings("ignore")
 
 
-# In[3]:
+# In[4]:
 
 
 print(df["BufferSize"].unique())
 print(scenario_names)
 
 
-# In[4]:
+# In[5]:
 
 
 #SYNTAX df.loc[ (expr1) & (expr2) | ...]  => Klammern nicht vergessen
@@ -74,7 +82,7 @@ current_df = current_df.loc[current_df["MovementModel"].isin(['MG1_100_24h', 'MG
 ("")
 
 
-# In[5]:
+# In[6]:
 
 
 #sns.set_theme(style="ticks" , palette=sns.color_palette("pastel", 4))
@@ -88,7 +96,7 @@ sns.set_theme(style="ticks" , palette=sns.color_palette("bright"))
 # <font size="5">Delivery Probability All</font>
 # 
 
-# In[6]:
+# In[7]:
 
 
 plt_id = 0
@@ -117,40 +125,43 @@ for i in range(len(df_runs)):
 
 # <font size="5">Delivery Probability by Drop Policy</font>
 
-# In[7]:
+# In[8]:
 
 
+plot_path = os.path.join(OUTPUT_BP,"dp_drop")
+if not os.path.exists(plot_path):
+    os.makedirs(plot_path)
 plt_id = 0
+savefig = True
+
 for i in range(len(df_runs)):
     for buffersize in sorted(df["BufferSize"].unique()):
         for nodecount in sorted(df["Nodes"].unique()):
             try:           
                 plt.figure(plt_id)
-                plt.suptitle("Scenario: %s Nodes: %d Buffer: %s" % (df_runs[i][0], nodecount, buffersize),
+                if not savefig:
+                    plt.suptitle("Scenario: %s Nodes: %d Buffer: %s" % (df_runs[i][0], nodecount, buffersize),
                               fontsize=24, fontdict={"weight": "bold"})
                 plt_id += 1
                 current_df = df_runs[i][1]
                 current_df = current_df.loc[current_df["BufferSize"].isin([buffersize])] 
                 current_df = current_df.loc[current_df["Nodes"].isin([nodecount])] 
 
-                #Filter for Routing Algorithm
-                current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
-                                                                                 'SprayAndWaitRouter-7t','ProphetRouter', 'ProphetV2Router'])] 
-                #Filter for Bucket Policy
-                current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
-                 'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
-                 'prioritizeLowTTLBucketPolicy','randomBucketPolicy',
-                 'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
-                 'sourceSegregationBucketPolicy','staticFriendlyHostsBucketPolicy']))]
-
 
                 stripplot = sns.stripplot(x="RoutingAlgorithm", y="delivery_prob",
                             hue="DropPolicy",
                             data=current_df,
-                            dodge=True            
+                            dodge=True
                             )
 
                 sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+                if savefig:
+                    #plt.legend('',frameon=False)
+                    plt.ylim(0, 1)
+                    plt.ylabel("Delivery Probability")
+                    plt.xlabel("Drop Policy")
+                    plt.xticks(rotation=45)
+                    plt.savefig(os.path.join(plot_path,"%s_%dnodes_%sbuf.svg" % (df_runs[i][0], nodecount, buffersize)), bbox_inches='tight' ,format='svg')
 
             except:
                 pass
@@ -158,10 +169,13 @@ for i in range(len(df_runs)):
 
 # <font size="5">Delivery Probability for distinct Bucket Policy</font>
 
-# In[8]:
+# In[9]:
 
 
 plt_id = 0
+OUTPUT_BP = os.path.join(os.getcwd(),"output")
+if not os.path.exists(OUTPUT_BP):
+    os.makedirs(OUTPUT_BP)
 for i in range(len(df_runs)):
     for buffersize in sorted(df["BufferSize"].unique()):
         for nodecount in sorted(df["Nodes"].unique()):
@@ -198,7 +212,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Delivery Probability for distinct Sending Policy</font>
 
-# In[9]:
+# In[10]:
 
 
 plt_id = 0
@@ -238,7 +252,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Delivery Probability by Drop + Bucket Combination</font>
 
-# In[10]:
+# In[11]:
 
 
 enable = False
@@ -278,7 +292,7 @@ if enable:
 
 # <font size="5">Delivery Probability for distinct Router AND Drop + Bucket Combination</font>
 
-# In[11]:
+# In[12]:
 
 
 plt_id = 0
@@ -314,7 +328,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Delivery Probability for distinct Router AND Drop + Send Combination</font>
 
-# In[ ]:
+# In[13]:
 
 
 plt_id = 0
@@ -350,7 +364,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Latency Median</font>
 
-# In[ ]:
+# In[14]:
 
 
 plt_id = 0
@@ -385,7 +399,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Latency AVG by Drop Policy</font>
 
-# In[ ]:
+# In[15]:
 
 
 plt_id = 0
@@ -429,7 +443,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Latency AVG by Sending Policy</font>
 
-# In[ ]:
+# In[16]:
 
 
 plt_id = 0
@@ -476,7 +490,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Overhead Ratio</font>
 
-# In[ ]:
+# In[17]:
 
 
 plt_id = 0
@@ -511,7 +525,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Overhead Ratio by Drop Policy</font>
 
-# In[ ]:
+# In[18]:
 
 
 plt_id = 0
@@ -555,7 +569,7 @@ for i in range(len(df_runs)):
 
 # <font size="5">Overhead Ratio by Sending Policy</font>
 
-# In[ ]:
+# In[19]:
 
 
 plt_id = 0
@@ -594,8 +608,62 @@ for i in range(len(df_runs)):
                           fontsize=24, fontdict={"weight": "bold"})
 
 
+# In[ ]:
+
+
+
+
+
+# In[26]:
+
+
+plt_id = 0
+for i in range(len(df_runs)):
+    for buffersize in sorted(df["BufferSize"].unique()):
+        for nodecount in sorted(df["Nodes"].unique()):
+            plt.figure(plt_id)
+            plt_id += 1
+            current_df = df_runs[i][1]
+            current_df = current_df.loc[current_df["BufferSize"].isin([buffersize])] 
+            current_df = current_df.loc[current_df["Nodes"].isin([nodecount])] 
+
+            #Filter for Routing Algorithm
+            current_df = current_df.loc[current_df["RoutingAlgorithm"].isin(['EpidemicRouter', 'SprayAndWaitRouter-7f',
+                                                                             'SprayAndWaitRouter-7t','ProphetRouter', 'ProphetV2Router'])] 
+            #Filter for Bucket Policy
+            current_df = current_df.loc[(current_df["BucketPolicy"].isin(['DefaultBucketAssignmentPolicy','destinationBasedBucketPolicy',
+             'forwardCountBucketPolicy','friendlyHostsBucketPolicy',
+             'prioritizeLowTTLBucketPolicy','randomBucketPolicy',
+             'roundRobinBucketPolicy','senderBasedBucketAssignmentPolicy',
+             'sourceSegregationBucketPolicy','staticFriendlyHostsBucketPolicy']))]
+
+            """
+            sns.boxplot(x="RoutingAlgorithm", y="delivery_prob",
+                        hue="DropPolicy",
+                        data=current_df,                   
+                       )
+            """
+
+            stripplot = sns.stripplot(x="RoutingAlgorithm", y="hopcount_avg",
+                        hue="DropPolicy",
+                        data=current_df,
+                        dodge=True            
+                        )
+
+
+            sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+            plt.suptitle("Scenario: %s Nodes: %d Buffer: %s" % (df_runs[i][0], nodecount, buffersize),
+                          fontsize=24, fontdict={"weight": "bold"})
+
+
 # # 
 # <font size="15">Backup</font>
+
+# In[20]:
+
+
+stopper
+
 
 # In[ ]:
 
@@ -615,26 +683,149 @@ for i in range(len(df_runs)):
 ("")
 
 
-# In[ ]:
+# Nodes + Drop
+
+# In[14]:
 
 
+active = True
+savefig = True
+
+palette = {
+    "L": 'tab:red',
+    "M": 'tab:orange',
+    "S": 'tab:green',
+}
+
+if active:
+    plot_path = os.path.join(OUTPUT_BP,"dp_drop")
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    plt_id = 0
+    df['DropPolicy'] = df['DropPolicy'].str.replace("dropFrontPolicy","Drop Front").replace("dropHeadPolicy","Drop Head").replace("dropLargestPolicy","Drop Largest").replace("dropLastPolicy","Drop Last").replace("dropRandomPolicy","Drop Random").replace("dropYoungestPolicy","Drop Youngest").replace("mofoPolicy","MOFO").replace("shliPolicy","SHLI")
+    #for i in df["Scenario"].unique():
+    for i in ["scenario3"]:
+        for buffersize in sorted(df["BufferSize"].unique()):
+                    plt.figure(plt_id)
+                    if not savefig:
+                        plt.suptitle("Scenario: %s  Buffer: %s" % (df_runs[i][0], buffersize),
+                                  fontsize=24, fontdict={"weight": "bold"})
+                    plt_id += 1
+                    current_df = df.loc[df["Scenario"].isin([i])] 
+                    current_df = current_df.loc[current_df["BufferSize"].isin([buffersize])]
+                    
+                    stripplot = sns.swarmplot(x="DropPolicy", y="delivery_prob",hue="WorldSize",
+                                data=current_df,palette=palette)
+                    
+                    stripplot.set_xticklabels(stripplot.get_xticklabels(),rotation=45)
+
+                    sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+                    if savefig:
+                        """
+                        plt.legend('',frameon=False)
+                        
+                        """
+                        plt.ylim(0, 1)
+                        plt.ylabel("Delivery Probability")
+                        #plt.xlabel("Drop Policy")
+                        #plt.xticks(rotation=45)
+                        
+                        plt.savefig(os.path.join(plot_path,"%s_%s_swarm-buf-worldsizes.svg" % (i, buffersize)), bbox_inches='tight' ,format='svg')
 
 
-
-# In[ ]:
-
+# In[15]:
 
 
+active = True
+savefig = True
+
+palette = {
+    100: 'tab:red',
+    50: 'tab:orange',
+    25: 'tab:green',
+}
+
+if active:
+    plot_path = os.path.join(OUTPUT_BP,"dp_drop")
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    plt_id = 0
+    for i in range(len(df_runs)):
+        df_runs[i][1]['DropPolicy'] = df_runs[i][1]['DropPolicy'].str.replace("dropFrontPolicy","Drop Front").replace("dropHeadPolicy","Drop Head").replace("dropLargestPolicy","Drop Largest").replace("dropLastPolicy","Drop Last").replace("dropRandomPolicy","Drop Random").replace("dropYoungestPolicy","Drop Youngest").replace("mofoPolicy","MOFO").replace("shliPolicy","SHLI")
+        for buffersize in sorted(df["BufferSize"].unique()):
+                    plt.figure(plt_id)
+                    if not savefig:
+                        plt.suptitle("Scenario: %s  Buffer: %s" % (df_runs[i][0], buffersize),
+                                  fontsize=24, fontdict={"weight": "bold"})
+                    plt_id += 1
+                    current_df = df_runs[i][1]
+                    current_df = current_df.loc[current_df["BufferSize"].isin([buffersize])] 
+                    current_df = current_df.loc[current_df["Nodes"].isin([100])] 
+                    
+                    stripplot = sns.swarmplot(x="DropPolicy", y="delivery_prob",
+                                data=current_df)
+                    
+                    stripplot.set_xticklabels(stripplot.get_xticklabels(),rotation=45)
+
+                    #sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+                    if savefig:
+                        """
+                        plt.legend('',frameon=False)
+                        
+                        """
+                        plt.ylim(0, 1)
+                        plt.ylabel("Delivery Probability")
+                        #plt.xlabel("Drop Policy")
+                        #plt.xticks(rotation=45)
+                        
+                        plt.savefig(os.path.join(plot_path,"%s_%s_100n-swarm-buf.svg" % (df_runs[i][0], buffersize)), bbox_inches='tight' ,format='svg')
 
 
-# In[ ]:
+# In[18]:
 
 
+active = True
+savefig = True
+
+palette = {
+    100: 'tab:red',
+    50: 'tab:orange',
+    25: 'tab:green',
+}
+
+if active:
+    plot_path = os.path.join(OUTPUT_BP,"dp_drop")
+    if not os.path.exists(plot_path):
+        os.makedirs(plot_path)
+    plt_id = 0
+    for i in range(len(df_runs)):
+        df_runs[i][1]['DropPolicy'] = df_runs[i][1]['DropPolicy'].str.replace("dropFrontPolicy","Drop Front").replace("dropHeadPolicy","Drop Head").replace("dropLargestPolicy","Drop Largest").replace("dropLastPolicy","Drop Last").replace("dropRandomPolicy","Drop Random").replace("dropYoungestPolicy","Drop Youngest").replace("mofoPolicy","MOFO").replace("shliPolicy","SHLI")
+        for buffersize in sorted(df["BufferSize"].unique()):
+                    plt.figure(plt_id)
+                    if not savefig:
+                        plt.suptitle("Scenario: %s  Buffer: %s" % (df_runs[i][0], buffersize),
+                                  fontsize=24, fontdict={"weight": "bold"})
+                    plt_id += 1
+                    current_df = df_runs[i][1]
+                    current_df = current_df.loc[current_df["BufferSize"].isin([buffersize])] 
+                    
+                    stripplot = sns.swarmplot(x="DropPolicy", y="delivery_prob",hue="Nodes",
+                                data=current_df,palette=palette)
+                    
+                    stripplot.set_xticklabels(stripplot.get_xticklabels(),rotation=45)
+
+                    sns.move_legend(stripplot , "upper left", bbox_to_anchor=(1, 1))
+                    if savefig:
+                        """
+                        plt.legend('',frameon=False)
+                        
+                        """
+                        plt.ylim(0, 1)
+                        plt.ylabel("Delivery Probability")
+                        #plt.xlabel("Drop Policy")
+                        #plt.xticks(rotation=45)
+                        
+                        plt.savefig(os.path.join(plot_path,"%s_%s-swarm-buf.svg" % (df_runs[i][0], buffersize)), bbox_inches='tight' ,format='svg')
 
 
-
-# In[ ]:
-
-
-
-
+# 
