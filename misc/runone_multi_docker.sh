@@ -26,7 +26,7 @@ printf "\rProgress : [${_fill// /#}${_empty// /-}] ${_progress}%%\n"
 
 # Create temp folder for setting files
 confdir=$(mktemp -d)
-python3 thesis-2022-regev-code/misc/settings_generator.py --input "$1" --output "$confdir"
+python3 dtn_repo/misc/settings_generator.py --input "$1" --output "$confdir"
 
 # Count of max" processors
 max_processes=$(nproc --all)

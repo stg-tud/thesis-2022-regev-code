@@ -16,6 +16,7 @@ installation
 0) Pull the project and provide it with adequate permissions (in Linux chmod)
 1) Perform the regular installation of The ONE (installing of java and compiling of file)
 2) Install python3 
+3) For pipelining script install numactl
 
 Pipeline Execution
 ==================
